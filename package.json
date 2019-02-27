@@ -25,6 +25,7 @@
     "npm": ">= 6.0.0"
   },
   "dependencies": {
+    "chalk": "^2.4.2",
     "commander": "^2.19.0",
     "csvtojson": "^2.0.8"
   },
