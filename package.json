@@ -1,5 +1,5 @@
 {
-  "name": "zenmoney-portfolio-calculator",
+  "name": "@loginov-rocks/zenmoney-portfolio-calculator",
   "version": "0.1.0",
   "description": "ZenMoney Portfolio Calculator",
   "bin": {
@@ -16,6 +16,7 @@
   },
   "author": "Danila Loginov <danila@loginov.rocks> (https://loginov.rocks)",
   "license": "MIT",
+  "private": true,
   "bugs": {
     "url": "https://github.com/loginov-rocks/ZenMoney-Portfolio-Calculator/issues"
   },
