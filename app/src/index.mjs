@@ -3,7 +3,7 @@ import express from 'express';
 import {
   PORT, ZENMONEY_API_BASE_URL, ZENMONEY_API_CONSUMER_KEY, ZENMONEY_API_CONSUMER_SECRET, ZENMONEY_API_REDIRECT_URI,
 } from './Constants.mjs';
-import { ZenMoneyApi } from './ZenMoneyApi.mjs';
+import { ZenMoneyApi } from './ZenMoneyApi/ZenMoneyApi.mjs';
 
 const app = express();
 
@@ -29,6 +29,21 @@ app.post('/auth/token', async (request, response) => {
   }
 
   return response.json(tokenResponse);
+});
+
+app.post('/diff', async (request, response) => {
+  const accessToken = request.headers.authorization.substring(7);
+
+  let diffResponse;
+  try {
+    diffResponse = await zenMoneyApi.diff(accessToken);
+  } catch (error) {
+    console.error(error);
+
+    return response.status(error.status).json({ error });
+  }
+
+  return response.json(diffResponse);
 });
 
 app.listen(PORT, () => {

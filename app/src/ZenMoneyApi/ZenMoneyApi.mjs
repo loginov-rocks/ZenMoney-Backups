@@ -6,6 +6,39 @@ export class ZenMoneyApi {
     this.redirectUri = redirectUri;
   }
 
+  async diff(accessToken) {
+    const url = `${this.baseUrl}/v8/diff`;
+
+    const body = JSON.stringify({
+      currentClientTimestamp: Math.round(Date.now() / 1000),
+      serverTimestamp: 0,
+    });
+
+    const response = await fetch(url, {
+      body,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'post',
+    });
+
+    let json;
+    try {
+      json = await response.json();
+    } catch (error) {
+      console.error(error);
+    }
+
+    if (!response.ok) {
+      const { status, statusText } = response;
+
+      throw { json, status, statusText };
+    }
+
+    return json;
+  }
+
   async token(code) {
     const url = `${this.baseUrl}/oauth2/token`;
 
@@ -25,7 +58,12 @@ export class ZenMoneyApi {
       method: 'post',
     });
 
-    const json = await response.json();
+    let json;
+    try {
+      json = await response.json();
+    } catch (error) {
+      console.error(error);
+    }
 
     if (!response.ok) {
       const { status, statusText } = response;
