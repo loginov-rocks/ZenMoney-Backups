@@ -6,6 +6,9 @@ export class ZenMoneyApi {
     this.redirectUri = redirectUri;
   }
 
+  /**
+   * @see https://github.com/zenmoney/ZenPlugins/wiki/ZenMoney-API#diff
+   */
   async diff(accessToken) {
     const url = `${this.baseUrl}/v8/diff`;
 
@@ -39,6 +42,9 @@ export class ZenMoneyApi {
     return json;
   }
 
+  /**
+   * @see https://github.com/zenmoney/ZenPlugins/wiki/ZenMoney-API#авторизация-
+   */
   async token(code) {
     const url = `${this.baseUrl}/oauth2/token`;
 

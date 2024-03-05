@@ -1,7 +1,7 @@
 {
   "scripts": {
     "serve": "node --watch src/index.mjs",
-    "start": "node src/index.mjs"
+    "start": "NODE_ENV=production node src/index.mjs"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

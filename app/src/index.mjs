@@ -3,9 +3,9 @@ import express from 'express';
 import {
   PORT, ZENMONEY_API_BASE_URL, ZENMONEY_API_CONSUMER_KEY, ZENMONEY_API_CONSUMER_SECRET, ZENMONEY_API_REDIRECT_URI,
 } from './Constants.mjs';
+import { DataService } from './DataService.mjs';
+import { DiffCachingService } from './DiffCachingService.mjs';
 import { ZenMoneyApi } from './ZenMoneyApi/ZenMoneyApi.mjs';
-
-const app = express();
 
 const zenMoneyApi = new ZenMoneyApi({
   baseUrl: ZENMONEY_API_BASE_URL,
@@ -14,7 +14,47 @@ const zenMoneyApi = new ZenMoneyApi({
   redirectUri: ZENMONEY_API_REDIRECT_URI,
 });
 
+const diffCachingService = new DiffCachingService({
+  zenMoneyApi,
+});
+
+const dataService = new DataService({
+  diffCachingService,
+});
+
+const app = express();
+
 app.use(express.json());
+
+app.get('/accounts', async (request, response) => {
+  const accessToken = request.headers.authorization.substring(7);
+
+  let accounts;
+  try {
+    accounts = await dataService.accounts(accessToken);
+  } catch (error) {
+    console.error(error);
+
+    return response.status(error.status).json({ error });
+  }
+
+  return response.json({ accounts });
+});
+
+app.get('/user', async (request, response) => {
+  const accessToken = request.headers.authorization.substring(7);
+
+  let user;
+  try {
+    user = await dataService.user(accessToken);
+  } catch (error) {
+    console.error(error);
+
+    return response.status(error.status).json({ error });
+  }
+
+  return response.json({ user });
+});
 
 app.post('/auth/token', async (request, response) => {
   const { code } = request.body;
@@ -29,21 +69,6 @@ app.post('/auth/token', async (request, response) => {
   }
 
   return response.json(tokenResponse);
-});
-
-app.post('/diff', async (request, response) => {
-  const accessToken = request.headers.authorization.substring(7);
-
-  let diffResponse;
-  try {
-    diffResponse = await zenMoneyApi.diff(accessToken);
-  } catch (error) {
-    console.error(error);
-
-    return response.status(error.status).json({ error });
-  }
-
-  return response.json(diffResponse);
 });
 
 app.listen(PORT, () => {
