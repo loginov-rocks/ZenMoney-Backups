@@ -23,6 +23,57 @@ export class DataService {
     return accounts;
   }
 
+  async transactions(accessToken) {
+    const diff = await this.diffCachingService.diff(accessToken);
+
+    const transactions = diff.transaction.map((transaction) => {
+      const incomeAccount = diff.account.find((account) => account.id === transaction.incomeAccount);
+      const outcomeAccount = diff.account.find((account) => account.id === transaction.outcomeAccount);
+
+      const incomeInstrument = diff.instrument.find((instrument) => instrument.id === transaction.incomeInstrument);
+      const outcomeInstrument = diff.instrument.find((instrument) => instrument.id === transaction.outcomeInstrument);
+
+      return {
+        id: transaction.id,
+        date: transaction.date,
+        //
+        incomeAccount: {
+          id: transaction.incomeAccount,
+          title: incomeAccount ? incomeAccount.title : null,
+        },
+        incomeAmount: transaction.income,
+        incomeCurrency: {
+          code: incomeInstrument ? incomeInstrument.shortTitle : null,
+          symbol: incomeInstrument ? incomeInstrument.symbol : null,
+        },
+        //
+        outcomeAccount: {
+          id: transaction.outcomeAccount,
+          title: outcomeAccount ? outcomeAccount.title : null,
+        },
+        outcomeAmount: transaction.outcome,
+        outcomeCurrency: {
+          code: outcomeInstrument ? outcomeInstrument.shortTitle : null,
+          symbol: outcomeInstrument ? outcomeInstrument.symbol : null,
+        },
+        //
+        categories: transaction.tag.map((tagId) => {
+          const tag = diff.tag.find((tag) => tag.id === tagId);
+
+          return {
+            id: tagId,
+            title: tag ? tag.title : null,
+          };
+        }),
+        //
+        payee: transaction.payee || null,
+        comment: transaction.comment || null,
+      };
+    });
+
+    return transactions;
+  }
+
   async user(accessToken) {
     const diff = await this.diffCachingService.diff(accessToken);
 

@@ -41,6 +41,21 @@ app.get('/accounts', async (request, response) => {
   return response.json({ accounts });
 });
 
+app.get('/transactions', async (request, response) => {
+  const accessToken = request.headers.authorization.substring(7);
+
+  let transactions;
+  try {
+    transactions = await dataService.transactions(accessToken);
+  } catch (error) {
+    console.error(error);
+
+    return response.status(error.status).json({ error });
+  }
+
+  return response.json({ transactions });
+});
+
 app.get('/user', async (request, response) => {
   const accessToken = request.headers.authorization.substring(7);
 
