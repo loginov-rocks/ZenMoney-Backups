@@ -18,6 +18,16 @@
     "PersistentStackName": {
       "Description": "Name of previously deployed \"Persistent\" CloudFormation Stack",
       "Type": "String"
+    },
+    "ZenMoneyApiBaseUrl": {
+      "Default": "https://api.zenmoney.ru",
+      "Description": "ZenMoney API Base URL",
+      "Type": "String"
+    },
+    "ZenMoneyApiRedirectUri": {
+      "Default": "http://localhost:3000",
+      "Description": "ZenMoney API Redirect URI",
+      "Type": "String"
     }
   },
   "Resources": {
@@ -161,6 +171,30 @@
               ]
             },
             "PolicyName": "AWSLambdaBasicExecutionRole"
+          },
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "ssm:GetParameter",
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerKeyParameterArn"
+                      }
+                    },
+                    {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerSecretParameterArn"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "PolicyName": "CustomPolicy"
           }
         ],
         "RoleName": {
@@ -176,6 +210,26 @@
         ],
         "Code": {
           "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+        },
+        "Environment": {
+          "Variables": {
+            "ZENMONEY_API_BASE_URL": {
+              "Ref": "ZenMoneyApiBaseUrl"
+            },
+            "ZENMONEY_API_CONSUMER_KEY_PARAMETER_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerKeyParameterName"
+              }
+            },
+            "ZENMONEY_API_CONSUMER_SECRET_PARAMETER_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerSecretParameterName"
+              }
+            },
+            "ZENMONEY_API_REDIRECT_URI": {
+              "Ref": "ZenMoneyApiRedirectUri"
+            }
+          }
         },
         "FunctionName": {
           "Fn::Sub": "${AWS::StackName}-auth-function"
