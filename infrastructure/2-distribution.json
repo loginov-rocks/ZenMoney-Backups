@@ -1,0 +1,183 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Outputs": {
+    "DistributionId": {
+      "Value": {
+        "Ref": "Distribution"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DistributionId"
+        }
+      }
+    },
+    "DomainName": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Distribution",
+          "DomainName"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DomainName"
+        }
+      }
+    },
+    "UserPoolClientId": {
+      "Value": {
+        "Ref": "UserPoolClient"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-UserPoolClientId"
+        }
+      }
+    }
+  },
+  "Parameters": {
+    "PersistentStackName": {
+      "Description": "Name of previously deployed \"Persistent\" CloudFormation Stack",
+      "Type": "String"
+    },
+    "UserPoolDomainPrefix": {
+      "Description": "User Pool Domain Prefix",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "WebAppBucketOriginAccessIdentity": {
+      "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+      "Properties": {
+        "CloudFrontOriginAccessIdentityConfig": {
+          "Comment": {
+            "Fn::Sub": "${AWS::StackName}-web-app-bucket-origin-access-identity"
+          }
+        }
+      }
+    },
+    "Distribution": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "CustomErrorResponses": [
+            {
+              "ErrorCode": 403,
+              "ResponseCode": 200,
+              "ResponsePagePath": "/index.html"
+            }
+          ],
+          "DefaultCacheBehavior": {
+            "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+            "Compress": true,
+            "TargetOriginId": "WebAppBucketOrigin",
+            "ViewerProtocolPolicy": "redirect-to-https"
+          },
+          "DefaultRootObject": "index.html",
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "Origins": [
+            {
+              "DomainName": {
+                "Fn::Sub": [
+                  "${WebAppBucketName}.s3.${AWS::Region}.amazonaws.com",
+                  {
+                    "WebAppBucketName": {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${PersistentStackName}-WebAppBucketName"
+                      }
+                    }
+                  }
+                ]
+              },
+              "Id": "WebAppBucketOrigin",
+              "S3OriginConfig": {
+                "OriginAccessIdentity": {
+                  "Fn::Sub": "origin-access-identity/cloudfront/${WebAppBucketOriginAccessIdentity}"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "UserPoolClient": {
+      "Type": "AWS::Cognito::UserPoolClient",
+      "Properties": {
+        "AllowedOAuthFlows": [
+          "code"
+        ],
+        "AllowedOAuthFlowsUserPoolClient": true,
+        "AllowedOAuthScopes": [
+          "email",
+          "openid",
+          "profile"
+        ],
+        "CallbackURLs": [
+          "http://localhost:3000"
+        ],
+        "ExplicitAuthFlows": [
+          "ALLOW_REFRESH_TOKEN_AUTH"
+        ],
+        "PreventUserExistenceErrors": "ENABLED",
+        "SupportedIdentityProviders": [
+          "COGNITO"
+        ],
+        "UserPoolId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${PersistentStackName}-UserPoolId"
+          }
+        }
+      }
+    },
+    "UserPoolDomain": {
+      "Type": "AWS::Cognito::UserPoolDomain",
+      "Properties": {
+        "Domain": {
+          "Ref": "UserPoolDomainPrefix"
+        },
+        "UserPoolId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${PersistentStackName}-UserPoolId"
+          }
+        }
+      }
+    },
+    "WebAppBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${PersistentStackName}-WebAppBucketName"
+          }
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Principal": {
+                "AWS": {
+                  "Fn::Sub": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${WebAppBucketOriginAccessIdentity}"
+                }
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Sub": [
+                  "${WebAppBucketArn}/*",
+                  {
+                    "WebAppBucketArn": {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${PersistentStackName}-WebAppBucketArn"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

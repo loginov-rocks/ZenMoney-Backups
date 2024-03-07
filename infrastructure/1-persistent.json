@@ -1,0 +1,230 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Outputs": {
+    "BackupsBucketArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "BackupsBucket",
+          "Arn"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-BackupsBucketArn"
+        }
+      }
+    },
+    "BackupsBucketName": {
+      "Value": {
+        "Ref": "BackupsBucket"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-BackupsBucketName"
+        }
+      }
+    },
+    "DeploymentBucketArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "DeploymentBucket",
+          "Arn"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DeploymentBucketArn"
+        }
+      }
+    },
+    "DeploymentBucketName": {
+      "Value": {
+        "Ref": "DeploymentBucket"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DeploymentBucketName"
+        }
+      }
+    },
+    "UserPoolId": {
+      "Value": {
+        "Ref": "UserPool"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-UserPoolId"
+        }
+      }
+    },
+    "WebAppBucketArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "WebAppBucket",
+          "Arn"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-WebAppBucketArn"
+        }
+      }
+    },
+    "WebAppBucketName": {
+      "Value": {
+        "Ref": "WebAppBucket"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-WebAppBucketName"
+        }
+      }
+    },
+    "ZenMoneyApiConsumerKeyParameterArn": {
+      "Value": {
+        "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${ZenMoneyApiConsumerKeyParameter}"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-ZenMoneyApiConsumerKeyParameterArn"
+        }
+      }
+    },
+    "ZenMoneyApiConsumerKeyParameterName": {
+      "Value": {
+        "Ref": "ZenMoneyApiConsumerKeyParameter"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-ZenMoneyApiConsumerKeyParameterName"
+        }
+      }
+    },
+    "ZenMoneyApiConsumerSecretParameterArn": {
+      "Value": {
+        "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${ZenMoneyApiConsumerSecretParameter}"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-ZenMoneyApiConsumerSecretParameterArn"
+        }
+      }
+    },
+    "ZenMoneyApiConsumerSecretParameterName": {
+      "Value": {
+        "Ref": "ZenMoneyApiConsumerSecretParameter"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-ZenMoneyApiConsumerSecretParameterName"
+        }
+      }
+    }
+  },
+  "Resources": {
+    "UserPool": {
+      "Type": "AWS::Cognito::UserPool",
+      "Properties": {
+        "AccountRecoverySetting": {
+          "RecoveryMechanisms": [
+            {
+              "Name": "verified_email",
+              "Priority": 1
+            }
+          ]
+        },
+        "AliasAttributes": [
+          "email"
+        ],
+        "AutoVerifiedAttributes": [
+          "email"
+        ],
+        "DeviceConfiguration": {
+          "DeviceOnlyRememberedOnUserPrompt": false
+        },
+        "Schema": [
+          {
+            "Mutable": true,
+            "Name": "email",
+            "Required": true
+          },
+          {
+            "Mutable": true,
+            "Name": "name",
+            "Required": true
+          }
+        ],
+        "UserAttributeUpdateSettings": {
+          "AttributesRequireVerificationBeforeUpdate": [
+            "email"
+          ]
+        },
+        "UsernameConfiguration": {
+          "CaseSensitive": false
+        }
+      }
+    },
+    "BackupsBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Fn::Sub": "${AWS::StackName}-backups-bucket-${AWS::AccountId}-${AWS::Region}"
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        }
+      }
+    },
+    "DeploymentBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Fn::Sub": "${AWS::StackName}-deployment-bucket-${AWS::AccountId}-${AWS::Region}"
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        }
+      }
+    },
+    "WebAppBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Fn::Sub": "${AWS::StackName}-web-app-bucket-${AWS::AccountId}-${AWS::Region}"
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        }
+      }
+    },
+    "ZenMoneyApiConsumerKeyParameter": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": {
+          "Fn::Sub": "/${AWS::StackName}/zenmoney-api/consumer-key"
+        },
+        "Type": "String",
+        "Value": "ZENMONEY_API_CONSUMER_KEY"
+      }
+    },
+    "ZenMoneyApiConsumerSecretParameter": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": {
+          "Fn::Sub": "/${AWS::StackName}/zenmoney-api/consumer-secret"
+        },
+        "Type": "String",
+        "Value": "ZENMONEY_API_CONSUMER_SECRET"
+      }
+    }
+  }
+}

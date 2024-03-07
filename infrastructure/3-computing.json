@@ -1,0 +1,207 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Outputs": {
+    "ApiBaseUrl": {
+      "Value": {
+        "Fn::GetAtt": [
+          "ApiGateway",
+          "ApiEndpoint"
+        ]
+      }
+    }
+  },
+  "Parameters": {
+    "DistributionStackName": {
+      "Description": "Name of previously deployed \"Distribution\" CloudFormation Stack",
+      "Type": "String"
+    },
+    "PersistentStackName": {
+      "Description": "Name of previously deployed \"Persistent\" CloudFormation Stack",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "ApiGateway": {
+      "Type": "AWS::ApiGatewayV2::Api",
+      "Properties": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-api-gw"
+        },
+        "ProtocolType": "HTTP"
+      }
+    },
+    "JwtAuthorizer": {
+      "Type": "AWS::ApiGatewayV2::Authorizer",
+      "Properties": {
+        "ApiId": {
+          "Ref": "ApiGateway"
+        },
+        "AuthorizerType": "JWT",
+        "JwtConfiguration": {
+          "Audience": [
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${DistributionStackName}-UserPoolClientId"
+              }
+            }
+          ],
+          "Issuer": {
+            "Fn::Sub": [
+              "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolId}",
+              {
+                "UserPoolId": {
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${PersistentStackName}-UserPoolId"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "IdentitySource": [
+          "$request.header.Authorization"
+        ],
+        "Name": "JWT"
+      }
+    },
+    "AuthIntegration": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "ApiGateway"
+        },
+        "IntegrationMethod": "POST",
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::Sub": [
+            "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthFunctionArn}/invocations",
+            {
+              "AuthFunctionArn": {
+                "Fn::GetAtt": [
+                  "AuthFunction",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        },
+        "PayloadFormatVersion": "2.0"
+      }
+    },
+    "AuthRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "ApiGateway"
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "JwtAuthorizer"
+        },
+        "RouteKey": "POST /auth",
+        "Target": {
+          "Fn::Sub": "integrations/${AuthIntegration}"
+        }
+      }
+    },
+    "Stage": {
+      "Type": "AWS::ApiGatewayV2::Stage",
+      "Properties": {
+        "ApiId": {
+          "Ref": "ApiGateway"
+        },
+        "AutoDeploy": true,
+        "StageName": "$default"
+      }
+    },
+    "AuthFunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "logs:CreateLogGroup",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+                  }
+                },
+                {
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": [
+                      "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}:*",
+                      {
+                        "FunctionName": {
+                          "Fn::Sub": "${AWS::StackName}-auth-function"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "PolicyName": "AWSLambdaBasicExecutionRole"
+          }
+        ],
+        "RoleName": {
+          "Fn::Sub": "${AWS::StackName}-auth-function-role"
+        }
+      }
+    },
+    "AuthFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": [
+          "arm64"
+        ],
+        "Code": {
+          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+        },
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-auth-function"
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "AuthFunctionRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs20.x"
+      }
+    },
+    "AuthFunctionPermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "AuthFunction"
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${Stage}/POST/auth"
+        }
+      }
+    }
+  }
+}
