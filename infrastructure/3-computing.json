@@ -177,6 +177,15 @@
               "Version": "2012-10-17",
               "Statement": [
                 {
+                  "Action": "dynamodb:PutItem",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${PersistentStackName}-UsersTableArn"
+                    }
+                  }
+                },
+                {
                   "Action": "ssm:GetParameter",
                   "Effect": "Allow",
                   "Resource": [
@@ -213,6 +222,11 @@
         },
         "Environment": {
           "Variables": {
+            "USERS_TABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-UsersTableName"
+              }
+            },
             "ZENMONEY_API_BASE_URL": {
               "Ref": "ZenMoneyApiBaseUrl"
             },
@@ -241,7 +255,8 @@
             "Arn"
           ]
         },
-        "Runtime": "nodejs20.x"
+        "Runtime": "nodejs20.x",
+        "Timeout": 20
       }
     },
     "AuthFunctionPermission": {

@@ -57,6 +57,29 @@
         }
       }
     },
+    "UsersTableArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "UsersTable",
+          "Arn"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-UsersTableArn"
+        }
+      }
+    },
+    "UsersTableName": {
+      "Value": {
+        "Ref": "UsersTable"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-UsersTableName"
+        }
+      }
+    },
     "WebAppBucketArn": {
       "Value": {
         "Fn::GetAtt": [
@@ -161,6 +184,27 @@
         },
         "UsernameConfiguration": {
           "CaseSensitive": false
+        }
+      }
+    },
+    "UsersTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "userId",
+            "AttributeType": "S"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "KeySchema": [
+          {
+            "AttributeName": "userId",
+            "KeyType": "HASH"
+          }
+        ],
+        "TableName": {
+          "Fn::Sub": "${AWS::StackName}-users-table"
         }
       }
     },
