@@ -211,6 +211,109 @@
         }
       }
     },
+    "BackupFunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "logs:CreateLogGroup",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+                  }
+                },
+                {
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": [
+                      "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}:*",
+                      {
+                        "FunctionName": {
+                          "Fn::Sub": "${AWS::StackName}-auth-function"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "PolicyName": "AWSLambdaBasicExecutionRole"
+          },
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "dynamodb:GetItem",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${PersistentStackName}-UsersTableArn"
+                    }
+                  }
+                },
+                {
+                  "Action": "s3:PutObject",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": [
+                      "${BackupsBucketArn}/*",
+                      {
+                        "BackupsBucketArn": {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${PersistentStackName}-BackupsBucketArn"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Action": "ssm:GetParameter",
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerKeyParameterArn"
+                      }
+                    },
+                    {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerSecretParameterArn"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "PolicyName": "CustomPolicy"
+          }
+        ],
+        "RoleName": {
+          "Fn::Sub": "${AWS::StackName}-backup-function-role"
+        }
+      }
+    },
     "AuthFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
@@ -257,6 +360,59 @@
         },
         "Runtime": "nodejs20.x",
         "Timeout": 20
+      }
+    },
+    "BackupFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": [
+          "arm64"
+        ],
+        "Code": {
+          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+        },
+        "Environment": {
+          "Variables": {
+            "BACKUPS_BUCKET_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-BackupsBucketName"
+              }
+            },
+            "USERS_TABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-UsersTableName"
+              }
+            },
+            "ZENMONEY_API_BASE_URL": {
+              "Ref": "ZenMoneyApiBaseUrl"
+            },
+            "ZENMONEY_API_CONSUMER_KEY_PARAMETER_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerKeyParameterName"
+              }
+            },
+            "ZENMONEY_API_CONSUMER_SECRET_PARAMETER_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerSecretParameterName"
+              }
+            },
+            "ZENMONEY_API_REDIRECT_URI": {
+              "Ref": "ZenMoneyApiRedirectUri"
+            }
+          }
+        },
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-backup-function"
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "BackupFunctionRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 60
       }
     },
     "AuthFunctionPermission": {
