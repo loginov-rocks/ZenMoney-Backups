@@ -375,6 +375,19 @@
                   }
                 },
                 {
+                  "Action": [
+                    "sqs:GetQueueAttributes",
+                    "sqs:ReceiveMessage",
+                    "sqs:DeleteMessage"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${PersistentStackName}-BackupQueueArn"
+                    }
+                  }
+                },
+                {
                   "Action": "ssm:GetParameter",
                   "Effect": "Allow",
                   "Resource": [
@@ -558,6 +571,21 @@
         "RoleName": {
           "Fn::Sub": "${AWS::StackName}-orchestrator-function-role"
         }
+      }
+    },
+    "BackupFunctionEventSourceMapping": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "BatchSize": 1,
+        "EventSourceArn": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${PersistentStackName}-BackupQueueArn"
+          }
+        },
+        "FunctionName": {
+          "Ref": "BackupFunction"
+        },
+        "MaximumBatchingWindowInSeconds": 10
       }
     },
     "AuthFunction": {

@@ -37,7 +37,18 @@ const serverTimestampToFileName = (serverTimestamp) => (
 export const handler = async (event) => {
   console.log('event', JSON.stringify(event));
 
-  const { userId } = event;
+  let message;
+  try {
+    message = JSON.parse(event.Records[0].body);
+  } catch (error) {
+    console.error(error);
+
+    return;
+  }
+
+  console.log('message', JSON.stringify(message));
+
+  const { userId } = message;
 
   if (!userId) {
     console.error('User ID missing');
@@ -59,7 +70,8 @@ export const handler = async (event) => {
     return;
   }
 
-  console.log('getCommandOutput', JSON.stringify(getCommandOutput));
+  // Hide to avoid logging ZenMoney tokens.
+  // console.log('getCommandOutput', JSON.stringify(getCommandOutput));
 
   if (!getCommandOutput || !getCommandOutput.Item) {
     console.error(`Item with User ID ${userId} missing`);
