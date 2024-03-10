@@ -1,5 +1,15 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
+  "Conditions": {
+    "OrchestratorRuleEnabled": {
+      "Fn::Equals": [
+        {
+          "Ref": "DisableOrchestratorRule"
+        },
+        "false"
+      ]
+    }
+  },
   "Outputs": {
     "ApiBaseUrl": {
       "Value": {
@@ -11,6 +21,15 @@
     }
   },
   "Parameters": {
+    "DisableOrchestratorRule": {
+      "AllowedValues": [
+        "false",
+        "true"
+      ],
+      "Default": "false",
+      "Description": "Disable Orchestrator Rule",
+      "Type": "String"
+    },
     "DistributionStackName": {
       "Description": "Name of previously deployed \"Distribution\" CloudFormation Stack",
       "Type": "String"
@@ -162,6 +181,33 @@
         },
         "AutoDeploy": true,
         "StageName": "$default"
+      }
+    },
+    "OrchestratorRule": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-orchestrator-rule"
+        },
+        "ScheduleExpression": "rate(1 day)",
+        "State": {
+          "Fn::If": [
+            "OrchestratorRuleEnabled",
+            "ENABLED",
+            "DISABLED"
+          ]
+        },
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "OrchestratorFunction",
+                "Arn"
+              ]
+            },
+            "Id": "OrchestratorRuleTarget"
+          }
+        ]
       }
     },
     "AuthFunctionRole": {
@@ -425,6 +471,95 @@
         }
       }
     },
+    "OrchestratorFunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "logs:CreateLogGroup",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+                  }
+                },
+                {
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": [
+                      "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}:*",
+                      {
+                        "FunctionName": {
+                          "Fn::Sub": "${AWS::StackName}-orchestrator-function"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "PolicyName": "AWSLambdaBasicExecutionRole"
+          },
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "dynamodb:Scan",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${PersistentStackName}-UsersTableArn"
+                    }
+                  }
+                },
+                {
+                  "Action": "s3:ListBucket",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${PersistentStackName}-BackupsBucketArn"
+                    }
+                  }
+                },
+                {
+                  "Action": "sqs:SendMessage",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${PersistentStackName}-BackupQueueArn"
+                    }
+                  }
+                }
+              ]
+            },
+            "PolicyName": "CustomPolicy"
+          }
+        ],
+        "RoleName": {
+          "Fn::Sub": "${AWS::StackName}-orchestrator-function-role"
+        }
+      }
+    },
     "AuthFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
@@ -558,6 +693,48 @@
         "Timeout": 20
       }
     },
+    "OrchestratorFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": [
+          "arm64"
+        ],
+        "Code": {
+          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+        },
+        "Environment": {
+          "Variables": {
+            "BACKUP_QUEUE_URL": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-BackupQueueUrl"
+              }
+            },
+            "BACKUPS_BUCKET_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-BackupsBucketName"
+              }
+            },
+            "USERS_TABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-UsersTableName"
+              }
+            }
+          }
+        },
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-orchestrator-function"
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "OrchestratorFunctionRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 60
+      }
+    },
     "AuthFunctionPermission": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
@@ -581,6 +758,22 @@
         "Principal": "apigateway.amazonaws.com",
         "SourceArn": {
           "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${Stage}/GET/list"
+        }
+      }
+    },
+    "OrchestratorFunctionPermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "OrchestratorFunction"
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "OrchestratorRule",
+            "Arn"
+          ]
         }
       }
     }

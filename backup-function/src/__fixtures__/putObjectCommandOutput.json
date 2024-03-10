@@ -1,0 +1,11 @@
+{
+  "$metadata": {
+    "httpStatusCode": 200,
+    "requestId": "RFJBCMAZ4BE2FKM1",
+    "extendedRequestId": "eG1Cvx7odP+Nh2Xk6B7z83Chjn9768JDAMWGMdW3nAK6rP/OLuay5aOWRF55VxJnG2HYY5ir1eY=",
+    "attempts": 1,
+    "totalRetryDelay": 0
+  },
+  "ETag": "\"71ac6e44debfe9056285b4d5c1ea136a\"",
+  "ServerSideEncryption": "AES256"
+}

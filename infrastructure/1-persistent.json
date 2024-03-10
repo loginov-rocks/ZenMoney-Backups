@@ -1,6 +1,29 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Outputs": {
+    "BackupQueueArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "BackupQueue",
+          "Arn"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-BackupQueueArn"
+        }
+      }
+    },
+    "BackupQueueUrl": {
+      "Value": {
+        "Ref": "BackupQueue"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-BackupQueueUrl"
+        }
+      }
+    },
     "BackupsBucketArn": {
       "Value": {
         "Fn::GetAtt": [
@@ -248,6 +271,34 @@
           "IgnorePublicAcls": true,
           "RestrictPublicBuckets": true
         }
+      }
+    },
+    "BackupDeadLetterQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": {
+          "Fn::Sub": "${AWS::StackName}-backup-dlq"
+        }
+      }
+    },
+    "BackupQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "QueueName": {
+          "Fn::Sub": "${AWS::StackName}-backup-queue"
+        },
+        "ReceiveMessageWaitTimeSeconds": 20,
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "BackupDeadLetterQueue",
+              "Arn"
+            ]
+          },
+          "maxReceiveCount": 5
+        },
+        "VisibilityTimeout": 370
       }
     },
     "ZenMoneyApiConsumerKeyParameter": {

@@ -39,6 +39,8 @@ export const handler = async (event) => {
     return { statusCode: 500 };
   }
 
+  console.log('listObjectsCommandOutput', JSON.stringify(listObjectsCommandOutput));
+
   if (!listObjectsCommandOutput.KeyCount || listObjectsCommandOutput.KeyCount === 0
     || !listObjectsCommandOutput.Contents || !Array.isArray(listObjectsCommandOutput.Contents)) {
     return {
