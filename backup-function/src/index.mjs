@@ -30,6 +30,10 @@ const zenMoneyApi = new ZenMoneyApi({
   redirectUri: ZENMONEY_API_REDIRECT_URI,
 });
 
+const serverTimestampToFileName = (serverTimestamp) => (
+  new Date(serverTimestamp * 1000).toISOString().replace(/[T:.]/g, '-')
+);
+
 export const handler = async (event) => {
   console.log('event', JSON.stringify(event));
 
@@ -94,7 +98,8 @@ export const handler = async (event) => {
     return;
   }
 
-  const objectKey = `${userId}/${new Date().toISOString().replace(/[T:.]/g, '-')}${BACKUPS_KEY_SUFFIX}`;
+  const { serverTimestamp } = diff;
+  const objectKey = `${userId}/${serverTimestampToFileName(serverTimestamp)}${BACKUPS_KEY_SUFFIX}`;
 
   const putObjectCommand = new PutObjectCommand({
     Body: JSON.stringify(diff),

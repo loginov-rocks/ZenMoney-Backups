@@ -77,7 +77,7 @@ export const handler = async (event) => {
     return { statusCode: 502 };
   }
 
-  const item = { authorizedAt: Date.now(), userId, token };
+  const item = { authorized: Date.now(), userId, token };
 
   const putCommand = new PutCommand({
     Item: item,
