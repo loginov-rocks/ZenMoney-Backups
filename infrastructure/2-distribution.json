@@ -33,6 +33,16 @@
           "Fn::Sub": "${AWS::StackName}-UserPoolClientId"
         }
       }
+    },
+    "UserPoolDomain": {
+      "Value": {
+        "Fn::Sub": "${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-UserPoolDomain"
+        }
+      }
     }
   },
   "Parameters": {

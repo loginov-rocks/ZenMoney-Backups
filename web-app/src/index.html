@@ -4,6 +4,12 @@
 <head>
   <title>ZenMoney Backups</title>
   <script>
+    const API_BASE_URL = 'https://abc123.execute-api.us-east-1.amazonaws.com';
+
+    const USER_POOL_CLIENT_CALLBACK_URL = 'http://localhost:3000';
+    const USER_POOL_CLIENT_ID = 'abc123';
+    const USER_POOL_DOMAIN = 'abc123.auth.us-east-1.amazoncognito.com';
+
     const ZENMONEY_API_BASE_URL = 'https://api.zenmoney.ru';
     const ZENMONEY_API_CONSUMER_KEY = 'abc123';
     const ZENMONEY_API_REDIRECT_URI = 'http://localhost:3000';
@@ -12,8 +18,9 @@
 </head>
 
 <body>
-  <h1>ZenMoney Web Auth</h1>
-  <button id="login">Login</button>
+  <h1>ZenMoney Backups</h1>
+  <button hidden id="login">Login</button>
+  <button hidden id="zenMoneyLogin">ZenMoney Login</button>
 </body>
 
 </html>

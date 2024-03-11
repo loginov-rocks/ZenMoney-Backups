@@ -53,6 +53,18 @@
     "ApiGateway": {
       "Type": "AWS::ApiGatewayV2::Api",
       "Properties": {
+        "CorsConfiguration": {
+          "AllowHeaders": [
+            "Authorization",
+            "Content-Type"
+          ],
+          "AllowMethods": [
+            "*"
+          ],
+          "AllowOrigins": [
+            "http://localhost:3000"
+          ]
+        },
         "Name": {
           "Fn::Sub": "${AWS::StackName}-api-gw"
         },
