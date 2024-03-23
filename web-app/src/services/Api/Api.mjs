@@ -16,6 +16,25 @@ export class Api {
     });
   }
 
+  async download(fileName) {
+    const url = `${this.baseUrl}/download/${fileName}`;
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${this.authData.access_token}`,
+      },
+      method: 'post',
+    });
+
+    if (!response.ok) {
+      throw response;
+    }
+
+    const json = await response.json();
+
+    return json.url;
+  }
+
   async getAuth() {
     const url = `${this.baseUrl}/auth`;
 
@@ -51,7 +70,7 @@ export class Api {
 
     const json = await response.json();
 
-    return json;
+    return json.backups;
   }
 
   restoreAuthData() {
