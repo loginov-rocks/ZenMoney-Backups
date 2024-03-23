@@ -16,6 +16,26 @@ export class Api {
     });
   }
 
+  async getAuth() {
+    const url = `${this.baseUrl}/auth`;
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${this.authData.access_token}`,
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return false;
+      }
+
+      throw response;
+    }
+
+    return true;
+  }
+
   async list() {
     const url = `${this.baseUrl}/list`;
 
