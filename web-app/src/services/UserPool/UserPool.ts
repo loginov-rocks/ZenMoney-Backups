@@ -1,11 +1,31 @@
+export interface AuthData {
+  access_token: string;
+  expires_in: number;
+  id_token: string;
+  refresh_token: string;
+  token_type: 'string';
+}
+
+interface Options {
+  clientCallbackUrl: string;
+  clientId: string;
+  domain: string;
+}
+
 export class UserPool {
-  constructor({ clientCallbackUrl, clientId, domain }) {
+  private readonly clientCallbackUrl: string;
+
+  private readonly clientId: string;
+
+  private readonly domain: string;
+
+  public constructor({ clientCallbackUrl, clientId, domain }: Options) {
     this.clientCallbackUrl = clientCallbackUrl;
     this.clientId = clientId;
     this.domain = domain;
   }
 
-  async auth(code) {
+  public async auth(code: string): Promise<AuthData> {
     const url = `https://${this.domain}/oauth2/token`;
 
     const params = {
@@ -25,16 +45,16 @@ export class UserPool {
       method: 'post',
     });
 
-    const json = await response.json();
-
-    if (json.error) {
-      throw json.error;
+    if (!response.ok) {
+      throw response;
     }
+
+    const json: AuthData = await response.json();
 
     return json;
   }
 
-  loginRedirect() {
+  public loginRedirect(): void {
     const scopes = ['email', 'openid', 'profile'];
 
     const urlSearchParams = new URLSearchParams({

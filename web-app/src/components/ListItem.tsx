@@ -20,7 +20,7 @@ export const ListItem: FC<Props> = ({ backup }) => {
 
     let url;
     try {
-      url = await apiService.download(backup.fileName);
+      url = await apiService.backupsGetUrl(backup.fileName);
     } catch (error) {
       alert(error);
 

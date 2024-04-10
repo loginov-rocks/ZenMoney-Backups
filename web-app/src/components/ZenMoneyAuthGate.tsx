@@ -15,7 +15,7 @@ export const ZenMoneyAuthGate: FC<Props> = ({ children }) => {
   const authorize = async (): Promise<void> => {
     let getAuthResponse;
     try {
-      getAuthResponse = await apiService.getAuth();
+      getAuthResponse = await apiService.zenMoneyValidateAuth();
     } catch (error) {
       setIsLoading(false);
 
@@ -40,7 +40,7 @@ export const ZenMoneyAuthGate: FC<Props> = ({ children }) => {
     }
 
     try {
-      await apiService.auth(authCode.authCode);
+      await apiService.zenMoneyAuth(authCode.authCode);
     } catch (error) {
       setIsLoading(false);
 

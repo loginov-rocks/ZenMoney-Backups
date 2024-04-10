@@ -1,11 +1,23 @@
+interface Options {
+  baseUrl: string;
+  consumerKey: string;
+  redirectUri: string;
+}
+
 export class ZenMoney {
-  constructor({ baseUrl, consumerKey, redirectUri }) {
+  private readonly baseUrl: string;
+
+  private readonly consumerKey: string;
+
+  private readonly redirectUri: string;
+
+  public constructor({ baseUrl, consumerKey, redirectUri }: Options) {
     this.baseUrl = baseUrl;
     this.consumerKey = consumerKey;
     this.redirectUri = redirectUri;
   }
 
-  loginRedirect() {
+  public loginRedirect(): void {
     const urlSearchParams = new URLSearchParams({
       client_id: this.consumerKey,
       redirect_uri: this.redirectUri,

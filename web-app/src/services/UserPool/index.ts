@@ -1,4 +1,4 @@
-import { UserPool } from './UserPool.mjs';
+import { UserPool } from './UserPool';
 
 import { USER_POOL_CLIENT_CALLBACK_URL, USER_POOL_CLIENT_ID, USER_POOL_DOMAIN } from '../../Constants';
 

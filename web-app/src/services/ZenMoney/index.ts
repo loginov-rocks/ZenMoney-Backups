@@ -1,4 +1,4 @@
-import { ZenMoney } from './ZenMoney.mjs';
+import { ZenMoney } from './ZenMoney';
 
 import { ZENMONEY_API_BASE_URL, ZENMONEY_API_CONSUMER_KEY, ZENMONEY_API_REDIRECT_URI } from '../../Constants';
 

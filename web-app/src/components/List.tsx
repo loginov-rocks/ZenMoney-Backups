@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 
 import apiService from '../services/Api';
+import { Backup } from '../services/Api/Api';
+
 import { ListItem } from './ListItem';
 
 export const List = () => {
-  const [backups, setBackups] = useState([]);
+  const [backups, setBackups] = useState<Backup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const listBackups = async (): Promise<void> => {
     let backups;
     try {
-      backups = await apiService.list();
+      backups = await apiService.backupsList();
     } catch (error) {
       setIsLoading(false);
 
