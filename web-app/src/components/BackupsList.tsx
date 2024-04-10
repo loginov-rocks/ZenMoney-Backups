@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import apiService from '../services/Api';
 import { Backup } from '../services/Api/Api';
 
-import { ListItem } from './ListItem';
+import { BackupsListItem } from './BackupsListItem';
 
-export const List = () => {
+export const BackupsList = () => {
   const [backups, setBackups] = useState<Backup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -14,8 +14,8 @@ export const List = () => {
     try {
       backups = await apiService.backupsList();
     } catch (error) {
+      console.error('BackupsList error when attempting to list backups', error);
       setIsLoading(false);
-
       alert(error);
 
       return;
@@ -29,34 +29,28 @@ export const List = () => {
     listBackups();
   }, []);
 
-  if (isLoading) {
-    return (
-      <>
-        <h2>List</h2>
-        <p>Loading...</p>
-      </>
-    );
-  }
+  const renderBackups = (): React.ReactNode => {
+    if (backups.length === 0) {
+      return <p>No backups found</p>;
+    }
 
-  if (backups.length === 0) {
     return (
-      <>
-        <h2>List</h2>
-        <p>No backups found</p>
-      </>
+      <ul>
+        {backups.map((backup, index) => (
+          <li key={index}>
+            <BackupsListItem backup={backup} />
+          </li>
+        ))}
+      </ul>
     );
   }
 
   return (
     <>
-      <h2>List</h2>
-      <ul>
-        {backups.map((backup, index) => (
-          <li key={index}>
-            <ListItem backup={backup} />
-          </li>
-        ))}
-      </ul>
+      <h2>Backups List</h2>
+      {isLoading
+        ? <p>Loading...</p>
+        : renderBackups()}
     </>
   );
-}
+};

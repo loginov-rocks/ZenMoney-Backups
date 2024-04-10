@@ -17,6 +17,8 @@ export const AuthGate: FC<Props> = ({ children }) => {
     try {
       authData = await userPoolService.auth(authCode);
     } catch (error) {
+      console.error('AuthGate error when attempting to authorize', error);
+      setIsLoading(false);
       alert(error);
 
       return;
@@ -45,20 +47,13 @@ export const AuthGate: FC<Props> = ({ children }) => {
     userPoolService.loginRedirect();
   };
 
-  if (isLoading) {
+  if (isLoading || !isAuthorized) {
     return (
       <>
         <h2>Authorization</h2>
-        <p>Loading...</p>
-      </>
-    );
-  }
-
-  if (!isAuthorized) {
-    return (
-      <>
-        <h2>Authorization</h2>
-        <p><button onClick={handleLoginClick}>Login</button></p>
+        {isLoading
+          ? <p>Loading...</p>
+          : <p><button onClick={handleLoginClick}>Login</button></p>}
       </>
     );
   }

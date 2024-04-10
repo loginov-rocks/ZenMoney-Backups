@@ -6,7 +6,7 @@ export interface Backup {
   size: number;
 }
 
-interface BackupsGetUrlResponse {
+interface BackupsCreateUrlResponse {
   url: string;
 }
 
@@ -35,7 +35,7 @@ export class Api {
     this.baseUrl = baseUrl;
   }
 
-  public async backupsGetUrl(fileName: string): Promise<string> {
+  public async backupsCreateUrl(fileName: string): Promise<string> {
     if (!this.authData) {
       throw new Error('Auth data missing');
     }
@@ -53,7 +53,7 @@ export class Api {
       throw response;
     }
 
-    const json: BackupsGetUrlResponse = await response.json();
+    const json: BackupsCreateUrlResponse = await response.json();
 
     return json.url;
   }
@@ -94,7 +94,7 @@ export class Api {
 
       return true;
     } catch (error) {
-      console.error(error);
+      console.error('API error when attempting to restore auth data', error);
     }
 
     return false;

@@ -1,5 +1,5 @@
 import { AuthGate } from './AuthGate';
-import { List } from './List';
+import { BackupsList } from './BackupsList';
 import { ZenMoneyAuthGate } from './ZenMoneyAuthGate';
 
 export const App = () => {
@@ -8,7 +8,7 @@ export const App = () => {
       <h1>ZenMoney Backups</h1>
       <AuthGate>
         <ZenMoneyAuthGate>
-          <List />
+          <BackupsList />
         </ZenMoneyAuthGate>
       </AuthGate>
     </>
