@@ -313,6 +313,70 @@
           "Statement": [
             {
               "Action": [
+                "cloudfront:CreateInvalidation",
+                "cloudfront:GetDistributionConfig",
+                "cloudfront:GetInvalidation",
+                "cloudfront:ListInvalidations",
+                "cloudfront:UpdateDistribution"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Sub": [
+                  "arn:aws:cloudfront::${AWS::AccountId}:distribution/${DistributionId}",
+                  {
+                    "DistributionId": {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${DistributionStackName}-DistributionId"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Action": "lambda:UpdateFunctionCode",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "BackupFunction",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
+                    "BackupsCreateUrlFunction",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
+                    "BackupsListFunction",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
+                    "OrchestratorFunction",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
+                    "ZenMoneyAuthFunction",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
+                    "ZenMoneyValidateAuthFunction",
+                    "Arn"
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
                 "s3:GetObject",
                 "s3:PutObject"
               ],
@@ -393,43 +457,29 @@
               ]
             },
             {
-              "Action": "lambda:UpdateFunctionCode",
+              "Action": [
+                "s3:DeleteObject",
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:PutObject"
+              ],
               "Effect": "Allow",
               "Resource": [
                 {
-                  "Fn::GetAtt": [
-                    "BackupFunction",
-                    "Arn"
-                  ]
+                  "Fn::ImportValue": {
+                    "Fn::Sub": "${PersistentStackName}-WebAppBucketArn"
+                  }
                 },
                 {
-                  "Fn::GetAtt": [
-                    "BackupsCreateUrlFunction",
-                    "Arn"
-                  ]
-                },
-                {
-                  "Fn::GetAtt": [
-                    "BackupsListFunction",
-                    "Arn"
-                  ]
-                },
-                {
-                  "Fn::GetAtt": [
-                    "OrchestratorFunction",
-                    "Arn"
-                  ]
-                },
-                {
-                  "Fn::GetAtt": [
-                    "ZenMoneyAuthFunction",
-                    "Arn"
-                  ]
-                },
-                {
-                  "Fn::GetAtt": [
-                    "ZenMoneyValidateAuthFunction",
-                    "Arn"
+                  "Fn::Sub": [
+                    "${WebAppBucketArn}/*",
+                    {
+                      "WebAppBucketArn": {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${PersistentStackName}-WebAppBucketArn"
+                        }
+                      }
+                    }
                   ]
                 }
               ]
