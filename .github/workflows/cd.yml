@@ -133,6 +133,14 @@ jobs:
           node-version: 20
       - run: npm ci
       - run: npm run build
+        env:
+          REACT_APP_API_BASE_URL: ${{ secrets.REACT_APP_API_BASE_URL }}
+          REACT_APP_USER_POOL_CLIENT_CALLBACK_URL: ${{ secrets.REACT_APP_USER_POOL_CLIENT_CALLBACK_URL }}
+          REACT_APP_USER_POOL_CLIENT_ID: ${{ secrets.REACT_APP_USER_POOL_CLIENT_ID }}
+          REACT_APP_USER_POOL_DOMAIN: ${{ secrets.REACT_APP_USER_POOL_DOMAIN }}
+          REACT_APP_ZENMONEY_API_BASE_URL: ${{ secrets.REACT_APP_ZENMONEY_API_BASE_URL }}
+          REACT_APP_ZENMONEY_API_CONSUMER_KEY: ${{ secrets.REACT_APP_ZENMONEY_API_CONSUMER_KEY }}
+          REACT_APP_ZENMONEY_API_REDIRECT_URI: ${{ secrets.REACT_APP_ZENMONEY_API_REDIRECT_URI }}
       - uses: reggionick/s3-deploy@v3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
