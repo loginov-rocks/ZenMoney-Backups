@@ -1,5 +1,7 @@
 # ZenMoney Backups
 
+[![CD](https://github.com/loginov-rocks/ZenMoney-Backups/actions/workflows/cd.yml/badge.svg)](https://github.com/loginov-rocks/ZenMoney-Backups/actions/workflows/cd.yml)
+
 ## TODO
 
 1. Orchestrator Function: Implement.
