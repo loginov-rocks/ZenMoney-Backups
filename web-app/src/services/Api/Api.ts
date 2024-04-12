@@ -40,7 +40,7 @@ export class Api {
       throw new Error('Auth data missing');
     }
 
-    const url = `${this.baseUrl}/download/${fileName}`;
+    const url = `${this.baseUrl}/backups/${fileName}/url`;
 
     const response = await fetch(url, {
       headers: {
@@ -63,7 +63,7 @@ export class Api {
       throw new Error('Auth data missing');
     }
 
-    const url = `${this.baseUrl}/list`;
+    const url = `${this.baseUrl}/backups`;
 
     const response = await fetch(url, {
       headers: {
@@ -111,7 +111,7 @@ export class Api {
       throw new Error('Auth data missing');
     }
 
-    const url = `${this.baseUrl}/auth`;
+    const url = `${this.baseUrl}/zenmoney/auth`;
     const request: ZenMoneyAuthRequest = { zenMoneyAuthCode };
 
     const response = await fetch(url, {
@@ -133,7 +133,7 @@ export class Api {
       throw new Error('Auth data missing');
     }
 
-    const url = `${this.baseUrl}/auth`;
+    const url = `${this.baseUrl}/zenmoney/auth`;
 
     const response = await fetch(url, {
       headers: {

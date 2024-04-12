@@ -31,7 +31,7 @@ export const BackupsListItem: FC<Props> = ({ backup }) => {
 
   return (
     <>
-      <a href="#" onClick={handleClick}>{new Date(backup.serverTimestamp * 1000).toString()}</a>
+      <button onClick={handleClick}>{new Date(backup.serverTimestamp * 1000).toString()}</button>
       {' '}
       ({Math.round(backup.size / 1024)} KB)
       {isLoading && ' Loading...'}
