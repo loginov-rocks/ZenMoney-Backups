@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "package": "rm -f backups-list-function.zip && zip -j backups-list-function.zip src/*"
+  },
   "peerDependencies": {
     "@aws-sdk/client-s3": "^3.0.0"
   }

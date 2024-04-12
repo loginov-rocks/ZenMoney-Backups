@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "package": "rm -f zenmoney-validate-auth-function.zip && zip -j zenmoney-validate-auth-function.zip src/*"
+  },
   "peerDependencies": {
     "@aws-sdk/client-dynamodb": "^3.0.0",
     "@aws-sdk/lib-dynamodb": "^3.0.0"
