@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
+
   backup-function-cd:
     name: Backup Function CD
     defaults:
@@ -34,3 +35,143 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           BACKUP_FUNCTION_NAME: ${{ secrets.BACKUP_FUNCTION_NAME }}
           DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+
+  backups-create-url-function-cd:
+    name: Backups Create URL Function CD
+    defaults:
+      run:
+        working-directory: backups-create-url-function
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run package
+      - name: Upload function deployment package to S3
+        run: aws s3 cp backups-create-url-function.zip s3://$DEPLOYMENT_BUCKET_NAME
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+      - name: Update function code
+        run: aws lambda update-function-code --function-name $BACKUPS_CREATE_URL_FUNCTION_NAME --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-key backups-create-url-function.zip > /dev/null
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          BACKUPS_CREATE_URL_FUNCTION_NAME: ${{ secrets.BACKUPS_CREATE_URL_FUNCTION_NAME }}
+          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+
+  backups-list-function-cd:
+    name: Backups List Function CD
+    defaults:
+      run:
+        working-directory: backups-list-function
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run package
+      - name: Upload function deployment package to S3
+        run: aws s3 cp backups-list-function.zip s3://$DEPLOYMENT_BUCKET_NAME
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+      - name: Update function code
+        run: aws lambda update-function-code --function-name $BACKUPS_LIST_FUNCTION_NAME --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-key backups-list-function.zip > /dev/null
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          BACKUPS_LIST_FUNCTION_NAME: ${{ secrets.BACKUPS_LIST_FUNCTION_NAME }}
+          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+
+  orchestrator-function-cd:
+    name: Orchestrator Function CD
+    defaults:
+      run:
+        working-directory: orchestrator-function
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run package
+      - name: Upload function deployment package to S3
+        run: aws s3 cp orchestrator-function.zip s3://$DEPLOYMENT_BUCKET_NAME
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+      - name: Update function code
+        run: aws lambda update-function-code --function-name $ORCHESTRATOR_FUNCTION_NAME --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-key orchestrator-function.zip > /dev/null
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+          ORCHESTRATOR_FUNCTION_NAME: ${{ secrets.ORCHESTRATOR_FUNCTION_NAME }}
+
+  zenmoney-auth-function-cd:
+    name: ZenMoney Auth Function CD
+    defaults:
+      run:
+        working-directory: zenmoney-auth-function
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run package
+      - name: Upload function deployment package to S3
+        run: aws s3 cp zenmoney-auth-function.zip s3://$DEPLOYMENT_BUCKET_NAME
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+      - name: Update function code
+        run: aws lambda update-function-code --function-name $ZENMONEY_AUTH_FUNCTION_NAME --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-key zenmoney-auth-function.zip > /dev/null
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+          ZENMONEY_AUTH_FUNCTION_NAME: ${{ secrets.ZENMONEY_AUTH_FUNCTION_NAME }}
+
+  zenmoney-validate-auth-function-cd:
+    name: ZenMoney Validate Auth Function CD
+    defaults:
+      run:
+        working-directory: zenmoney-validate-auth-function
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run package
+      - name: Upload function deployment package to S3
+        run: aws s3 cp zenmoney-validate-auth-function.zip s3://$DEPLOYMENT_BUCKET_NAME
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+      - name: Update function code
+        run: aws lambda update-function-code --function-name $ZENMONEY_VALIDATE_AUTH_FUNCTION_NAME --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-key zenmoney-validate-auth-function.zip > /dev/null
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+          ZENMONEY_VALIDATE_AUTH_FUNCTION_NAME: ${{ secrets.ZENMONEY_VALIDATE_AUTH_FUNCTION_NAME }}
