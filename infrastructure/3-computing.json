@@ -62,6 +62,18 @@
             "*"
           ],
           "AllowOrigins": [
+            {
+              "Fn::Sub": [
+                "https://${DomainName}",
+                {
+                  "DomainName": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${DistributionStackName}-DomainName"
+                    }
+                  }
+                }
+              ]
+            },
             "http://localhost:3000"
           ]
         },

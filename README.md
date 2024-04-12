@@ -2,10 +2,9 @@
 
 ## TODO
 
-1. Web App: Implement.
-2. Orchestrator Function: Implement.
+1. Orchestrator Function: Implement.
+2. ZenMoney: Request to update redirect URI.
 3. Infrastructure: Configure domains, origins, redirects as parameters.
-4. ZenMoney: Request to update redirect URI.
 
 ## Reference
 

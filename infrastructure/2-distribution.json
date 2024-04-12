@@ -124,6 +124,19 @@
           "profile"
         ],
         "CallbackURLs": [
+          {
+            "Fn::Sub": [
+              "https://${DomainName}",
+              {
+                "DomainName": {
+                  "Fn::GetAtt": [
+                    "Distribution",
+                    "DomainName"
+                  ]
+                }
+              }
+            ]
+          },
           "http://localhost:3000"
         ],
         "ExplicitAuthFlows": [
