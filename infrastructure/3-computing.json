@@ -302,6 +302,52 @@
         ]
       }
     },
+    "CdPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Sub": "${AWS::StackName}-cd-policy"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Sub": [
+                    "${DeploymentBucketArn}/backup-function.zip",
+                    {
+                      "DeploymentBucketArn": {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${PersistentStackName}-DeploymentBucketArn"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": "lambda:UpdateFunctionCode",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "BackupFunction",
+                    "Arn"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
     "BackupFunctionRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -821,6 +867,19 @@
         ],
         "RoleName": {
           "Fn::Sub": "${AWS::StackName}-zenmoney-validate-auth-function-role"
+        }
+      }
+    },
+    "CdUser": {
+      "Type": "AWS::IAM::User",
+      "Properties": {
+        "ManagedPolicyArns": [
+          {
+            "Ref": "CdPolicy"
+          }
+        ],
+        "UserName": {
+          "Fn::Sub": "${AWS::StackName}-cd-user"
         }
       }
     },
