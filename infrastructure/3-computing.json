@@ -105,7 +105,7 @@
         "Name": "JWT"
       }
     },
-    "AuthIntegration": {
+    "BackupsCreateUrlIntegration": {
       "Type": "AWS::ApiGatewayV2::Integration",
       "Properties": {
         "ApiId": {
@@ -115,11 +115,11 @@
         "IntegrationType": "AWS_PROXY",
         "IntegrationUri": {
           "Fn::Sub": [
-            "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthFunctionArn}/invocations",
+            "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${BackupsCreateUrlFunctionArn}/invocations",
             {
-              "AuthFunctionArn": {
+              "BackupsCreateUrlFunctionArn": {
                 "Fn::GetAtt": [
-                  "AuthFunction",
+                  "BackupsCreateUrlFunction",
                   "Arn"
                 ]
               }
@@ -129,7 +129,7 @@
         "PayloadFormatVersion": "2.0"
       }
     },
-    "DownloadIntegration": {
+    "BackupsListIntegration": {
       "Type": "AWS::ApiGatewayV2::Integration",
       "Properties": {
         "ApiId": {
@@ -139,11 +139,11 @@
         "IntegrationType": "AWS_PROXY",
         "IntegrationUri": {
           "Fn::Sub": [
-            "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DownloadFunctionArn}/invocations",
+            "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${BackupsListFunctionArn}/invocations",
             {
-              "DownloadFunctionArn": {
+              "BackupsListFunctionArn": {
                 "Fn::GetAtt": [
-                  "DownloadFunction",
+                  "BackupsListFunction",
                   "Arn"
                 ]
               }
@@ -153,7 +153,7 @@
         "PayloadFormatVersion": "2.0"
       }
     },
-    "GetAuthIntegration": {
+    "ZenMoneyAuthIntegration": {
       "Type": "AWS::ApiGatewayV2::Integration",
       "Properties": {
         "ApiId": {
@@ -163,11 +163,11 @@
         "IntegrationType": "AWS_PROXY",
         "IntegrationUri": {
           "Fn::Sub": [
-            "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetAuthFunctionArn}/invocations",
+            "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZenMoneyAuthFunctionArn}/invocations",
             {
-              "GetAuthFunctionArn": {
+              "ZenMoneyAuthFunctionArn": {
                 "Fn::GetAtt": [
-                  "GetAuthFunction",
+                  "ZenMoneyAuthFunction",
                   "Arn"
                 ]
               }
@@ -177,7 +177,7 @@
         "PayloadFormatVersion": "2.0"
       }
     },
-    "ListIntegration": {
+    "ZenMoneyValidateAuthIntegration": {
       "Type": "AWS::ApiGatewayV2::Integration",
       "Properties": {
         "ApiId": {
@@ -187,11 +187,11 @@
         "IntegrationType": "AWS_PROXY",
         "IntegrationUri": {
           "Fn::Sub": [
-            "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ListFunctionArn}/invocations",
+            "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZenMoneyValidateAuthFunctionArn}/invocations",
             {
-              "ListFunctionArn": {
+              "ZenMoneyValidateAuthFunctionArn": {
                 "Fn::GetAtt": [
-                  "ListFunction",
+                  "ZenMoneyValidateAuthFunction",
                   "Arn"
                 ]
               }
@@ -201,7 +201,7 @@
         "PayloadFormatVersion": "2.0"
       }
     },
-    "AuthRoute": {
+    "BackupsCreateUrlRoute": {
       "Type": "AWS::ApiGatewayV2::Route",
       "Properties": {
         "ApiId": {
@@ -211,13 +211,13 @@
         "AuthorizerId": {
           "Ref": "JwtAuthorizer"
         },
-        "RouteKey": "POST /auth",
+        "RouteKey": "POST /backups/{fileName}/url",
         "Target": {
-          "Fn::Sub": "integrations/${AuthIntegration}"
+          "Fn::Sub": "integrations/${BackupsCreateUrlIntegration}"
         }
       }
     },
-    "DownloadRoute": {
+    "BackupsListRoute": {
       "Type": "AWS::ApiGatewayV2::Route",
       "Properties": {
         "ApiId": {
@@ -227,13 +227,13 @@
         "AuthorizerId": {
           "Ref": "JwtAuthorizer"
         },
-        "RouteKey": "POST /download/{fileName}",
+        "RouteKey": "GET /backups",
         "Target": {
-          "Fn::Sub": "integrations/${DownloadIntegration}"
+          "Fn::Sub": "integrations/${BackupsListIntegration}"
         }
       }
     },
-    "GetAuthRoute": {
+    "ZenMoneyAuthRoute": {
       "Type": "AWS::ApiGatewayV2::Route",
       "Properties": {
         "ApiId": {
@@ -243,13 +243,13 @@
         "AuthorizerId": {
           "Ref": "JwtAuthorizer"
         },
-        "RouteKey": "GET /auth",
+        "RouteKey": "POST /zenmoney/auth",
         "Target": {
-          "Fn::Sub": "integrations/${GetAuthIntegration}"
+          "Fn::Sub": "integrations/${ZenMoneyAuthIntegration}"
         }
       }
     },
-    "ListRoute": {
+    "ZenMoneyValidateAuthRoute": {
       "Type": "AWS::ApiGatewayV2::Route",
       "Properties": {
         "ApiId": {
@@ -259,9 +259,9 @@
         "AuthorizerId": {
           "Ref": "JwtAuthorizer"
         },
-        "RouteKey": "GET /list",
+        "RouteKey": "GET /zenmoney/auth",
         "Target": {
-          "Fn::Sub": "integrations/${ListIntegration}"
+          "Fn::Sub": "integrations/${ZenMoneyValidateAuthIntegration}"
         }
       }
     },
@@ -300,93 +300,6 @@
             "Id": "OrchestratorRuleTarget"
           }
         ]
-      }
-    },
-    "AuthFunctionRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Principal": {
-                "Service": "lambda.amazonaws.com"
-              },
-              "Effect": "Allow"
-            }
-          ]
-        },
-        "Policies": [
-          {
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Action": "logs:CreateLogGroup",
-                  "Effect": "Allow",
-                  "Resource": {
-                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
-                  }
-                },
-                {
-                  "Action": [
-                    "logs:CreateLogStream",
-                    "logs:PutLogEvents"
-                  ],
-                  "Effect": "Allow",
-                  "Resource": {
-                    "Fn::Sub": [
-                      "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}:*",
-                      {
-                        "FunctionName": {
-                          "Fn::Sub": "${AWS::StackName}-auth-function"
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            },
-            "PolicyName": "AWSLambdaBasicExecutionRole"
-          },
-          {
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Action": "dynamodb:PutItem",
-                  "Effect": "Allow",
-                  "Resource": {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${PersistentStackName}-UsersTableArn"
-                    }
-                  }
-                },
-                {
-                  "Action": "ssm:GetParameter",
-                  "Effect": "Allow",
-                  "Resource": [
-                    {
-                      "Fn::ImportValue": {
-                        "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerKeyParameterArn"
-                      }
-                    },
-                    {
-                      "Fn::ImportValue": {
-                        "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerSecretParameterArn"
-                      }
-                    }
-                  ]
-                }
-              ]
-            },
-            "PolicyName": "CustomPolicy"
-          }
-        ],
-        "RoleName": {
-          "Fn::Sub": "${AWS::StackName}-auth-function-role"
-        }
       }
     },
     "BackupFunctionRole": {
@@ -505,7 +418,7 @@
         }
       }
     },
-    "DownloadFunctionRole": {
+    "BackupsCreateUrlFunctionRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -543,7 +456,7 @@
                       "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}:*",
                       {
                         "FunctionName": {
-                          "Fn::Sub": "${AWS::StackName}-download-function"
+                          "Fn::Sub": "${AWS::StackName}-backups-create-url-function"
                         }
                       }
                     ]
@@ -589,11 +502,11 @@
           }
         ],
         "RoleName": {
-          "Fn::Sub": "${AWS::StackName}-download-function-role"
+          "Fn::Sub": "${AWS::StackName}-backups-create-url-function-role"
         }
       }
     },
-    "GetAuthFunctionRole": {
+    "BackupsListFunctionRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -631,78 +544,7 @@
                       "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}:*",
                       {
                         "FunctionName": {
-                          "Fn::Sub": "${AWS::StackName}-get-auth-function"
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            },
-            "PolicyName": "AWSLambdaBasicExecutionRole"
-          },
-          {
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Action": "dynamodb:GetItem",
-                  "Effect": "Allow",
-                  "Resource": {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${PersistentStackName}-UsersTableArn"
-                    }
-                  }
-                }
-              ]
-            },
-            "PolicyName": "CustomPolicy"
-          }
-        ],
-        "RoleName": {
-          "Fn::Sub": "${AWS::StackName}-get-auth-function-role"
-        }
-      }
-    },
-    "ListFunctionRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Principal": {
-                "Service": "lambda.amazonaws.com"
-              },
-              "Effect": "Allow"
-            }
-          ]
-        },
-        "Policies": [
-          {
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Action": "logs:CreateLogGroup",
-                  "Effect": "Allow",
-                  "Resource": {
-                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
-                  }
-                },
-                {
-                  "Action": [
-                    "logs:CreateLogStream",
-                    "logs:PutLogEvents"
-                  ],
-                  "Effect": "Allow",
-                  "Resource": {
-                    "Fn::Sub": [
-                      "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}:*",
-                      {
-                        "FunctionName": {
-                          "Fn::Sub": "${AWS::StackName}-list-function"
+                          "Fn::Sub": "${AWS::StackName}-backups-list-function"
                         }
                       }
                     ]
@@ -731,7 +573,7 @@
           }
         ],
         "RoleName": {
-          "Fn::Sub": "${AWS::StackName}-list-function-role"
+          "Fn::Sub": "${AWS::StackName}-backups-list-function-role"
         }
       }
     },
@@ -824,6 +666,164 @@
         }
       }
     },
+    "ZenMoneyAuthFunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "logs:CreateLogGroup",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+                  }
+                },
+                {
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": [
+                      "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}:*",
+                      {
+                        "FunctionName": {
+                          "Fn::Sub": "${AWS::StackName}-zenmoney-auth-function"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "PolicyName": "AWSLambdaBasicExecutionRole"
+          },
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "dynamodb:PutItem",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${PersistentStackName}-UsersTableArn"
+                    }
+                  }
+                },
+                {
+                  "Action": "ssm:GetParameter",
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerKeyParameterArn"
+                      }
+                    },
+                    {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerSecretParameterArn"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "PolicyName": "CustomPolicy"
+          }
+        ],
+        "RoleName": {
+          "Fn::Sub": "${AWS::StackName}-zenmoney-auth-function-role"
+        }
+      }
+    },
+    "ZenMoneyValidateAuthFunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "logs:CreateLogGroup",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+                  }
+                },
+                {
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": [
+                      "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}:*",
+                      {
+                        "FunctionName": {
+                          "Fn::Sub": "${AWS::StackName}-zenmoney-validate-auth-function"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "PolicyName": "AWSLambdaBasicExecutionRole"
+          },
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "dynamodb:GetItem",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${PersistentStackName}-UsersTableArn"
+                    }
+                  }
+                }
+              ]
+            },
+            "PolicyName": "CustomPolicy"
+          }
+        ],
+        "RoleName": {
+          "Fn::Sub": "${AWS::StackName}-zenmoney-validate-auth-function-role"
+        }
+      }
+    },
     "BackupFunctionEventSourceMapping": {
       "Type": "AWS::Lambda::EventSourceMapping",
       "Properties": {
@@ -837,54 +837,6 @@
           "Ref": "BackupFunction"
         },
         "MaximumBatchingWindowInSeconds": 10
-      }
-    },
-    "AuthFunction": {
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Architectures": [
-          "arm64"
-        ],
-        "Code": {
-          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
-        },
-        "Environment": {
-          "Variables": {
-            "USERS_TABLE_NAME": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${PersistentStackName}-UsersTableName"
-              }
-            },
-            "ZENMONEY_API_BASE_URL": {
-              "Ref": "ZenMoneyApiBaseUrl"
-            },
-            "ZENMONEY_API_CONSUMER_KEY_PARAMETER_NAME": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerKeyParameterName"
-              }
-            },
-            "ZENMONEY_API_CONSUMER_SECRET_PARAMETER_NAME": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerSecretParameterName"
-              }
-            },
-            "ZENMONEY_API_REDIRECT_URI": {
-              "Ref": "ZenMoneyApiRedirectUri"
-            }
-          }
-        },
-        "FunctionName": {
-          "Fn::Sub": "${AWS::StackName}-auth-function"
-        },
-        "Handler": "index.handler",
-        "Role": {
-          "Fn::GetAtt": [
-            "AuthFunctionRole",
-            "Arn"
-          ]
-        },
-        "Runtime": "nodejs20.x",
-        "Timeout": 20
       }
     },
     "BackupFunction": {
@@ -940,7 +892,7 @@
         "Timeout": 60
       }
     },
-    "DownloadFunction": {
+    "BackupsCreateUrlFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Architectures": [
@@ -959,12 +911,12 @@
           }
         },
         "FunctionName": {
-          "Fn::Sub": "${AWS::StackName}-download-function"
+          "Fn::Sub": "${AWS::StackName}-backups-create-url-function"
         },
         "Handler": "index.handler",
         "Role": {
           "Fn::GetAtt": [
-            "DownloadFunctionRole",
+            "BackupsCreateUrlFunctionRole",
             "Arn"
           ]
         },
@@ -972,39 +924,7 @@
         "Timeout": 20
       }
     },
-    "GetAuthFunction": {
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Architectures": [
-          "arm64"
-        ],
-        "Code": {
-          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
-        },
-        "Environment": {
-          "Variables": {
-            "USERS_TABLE_NAME": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${PersistentStackName}-UsersTableName"
-              }
-            }
-          }
-        },
-        "FunctionName": {
-          "Fn::Sub": "${AWS::StackName}-get-auth-function"
-        },
-        "Handler": "index.handler",
-        "Role": {
-          "Fn::GetAtt": [
-            "GetAuthFunctionRole",
-            "Arn"
-          ]
-        },
-        "Runtime": "nodejs20.x",
-        "Timeout": 20
-      }
-    },
-    "ListFunction": {
+    "BackupsListFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Architectures": [
@@ -1023,12 +943,12 @@
           }
         },
         "FunctionName": {
-          "Fn::Sub": "${AWS::StackName}-list-function"
+          "Fn::Sub": "${AWS::StackName}-backups-list-function"
         },
         "Handler": "index.handler",
         "Role": {
           "Fn::GetAtt": [
-            "ListFunctionRole",
+            "BackupsListFunctionRole",
             "Arn"
           ]
         },
@@ -1078,55 +998,109 @@
         "Timeout": 60
       }
     },
-    "AuthFunctionPermission": {
+    "ZenMoneyAuthFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": [
+          "arm64"
+        ],
+        "Code": {
+          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+        },
+        "Environment": {
+          "Variables": {
+            "USERS_TABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-UsersTableName"
+              }
+            },
+            "ZENMONEY_API_BASE_URL": {
+              "Ref": "ZenMoneyApiBaseUrl"
+            },
+            "ZENMONEY_API_CONSUMER_KEY_PARAMETER_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerKeyParameterName"
+              }
+            },
+            "ZENMONEY_API_CONSUMER_SECRET_PARAMETER_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerSecretParameterName"
+              }
+            },
+            "ZENMONEY_API_REDIRECT_URI": {
+              "Ref": "ZenMoneyApiRedirectUri"
+            }
+          }
+        },
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-zenmoney-auth-function"
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "ZenMoneyAuthFunctionRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 20
+      }
+    },
+    "ZenMoneyValidateAuthFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": [
+          "arm64"
+        ],
+        "Code": {
+          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+        },
+        "Environment": {
+          "Variables": {
+            "USERS_TABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-UsersTableName"
+              }
+            }
+          }
+        },
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-zenmoney-validate-auth-function"
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "ZenMoneyValidateAuthFunctionRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 20
+      }
+    },
+    "BackupsCreateUrlFunctionPermission": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
-          "Ref": "AuthFunction"
+          "Ref": "BackupsCreateUrlFunction"
         },
         "Principal": "apigateway.amazonaws.com",
         "SourceArn": {
-          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${Stage}/POST/auth"
+          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${Stage}/POST/backups/*/url"
         }
       }
     },
-    "DownloadFunctionPermission": {
+    "BackupsListFunctionPermission": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
-          "Ref": "DownloadFunction"
+          "Ref": "BackupsListFunction"
         },
         "Principal": "apigateway.amazonaws.com",
         "SourceArn": {
-          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${Stage}/POST/download/*"
-        }
-      }
-    },
-    "GetAuthFunctionPermission": {
-      "Type": "AWS::Lambda::Permission",
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Ref": "GetAuthFunction"
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${Stage}/GET/auth"
-        }
-      }
-    },
-    "ListFunctionPermission": {
-      "Type": "AWS::Lambda::Permission",
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Ref": "ListFunction"
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${Stage}/GET/list"
+          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${Stage}/GET/backups"
         }
       }
     },
@@ -1143,6 +1117,32 @@
             "OrchestratorRule",
             "Arn"
           ]
+        }
+      }
+    },
+    "ZenMoneyAuthFunctionPermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "ZenMoneyAuthFunction"
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${Stage}/POST/zenmoney/auth"
+        }
+      }
+    },
+    "ZenMoneyValidateAuthFunctionPermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "ZenMoneyValidateAuthFunction"
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${Stage}/GET/zenmoney/auth"
         }
       }
     }
