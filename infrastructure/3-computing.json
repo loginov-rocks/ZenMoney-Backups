@@ -864,6 +864,77 @@
         }
       }
     },
+    "WorkflowStartFunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "logs:CreateLogGroup",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+                  }
+                },
+                {
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": [
+                      "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}:*",
+                      {
+                        "FunctionName": {
+                          "Fn::Sub": "${AWS::StackName}-workflow-start-function"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "PolicyName": "AWSLambdaBasicExecutionRole"
+          },
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "dynamodb:GetItem",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${PersistentStackName}-UsersTableArn"
+                    }
+                  }
+                }
+              ]
+            },
+            "PolicyName": "CustomPolicy"
+          }
+        ],
+        "RoleName": {
+          "Fn::Sub": "${AWS::StackName}-workflow-start-function-role"
+        }
+      }
+    },
     "ZenMoneyAuthFunctionRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -1207,6 +1278,38 @@
         },
         "Runtime": "nodejs20.x",
         "Timeout": 60
+      }
+    },
+    "WorkflowStartFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": [
+          "arm64"
+        ],
+        "Code": {
+          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+        },
+        "Environment": {
+          "Variables": {
+            "USERS_TABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-UsersTableName"
+              }
+            }
+          }
+        },
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-workflow-start-function"
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "WorkflowStartFunctionRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 20
       }
     },
     "ZenMoneyAuthFunction": {
