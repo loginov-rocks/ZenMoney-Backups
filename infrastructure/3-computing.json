@@ -864,6 +864,53 @@
         }
       }
     },
+    "StateMachineRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Principal": {
+                "Service": "states.amazonaws.com"
+              },
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "lambda:InvokeFunction",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "WorkflowStartFunction",
+                      "Arn"
+                    ]
+                  }
+                },
+                {
+                  "Action": "states:StartExecution",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${AWS::StackName}-state-machine"
+                  }
+                }
+              ]
+            },
+            "PolicyName": "CustomPolicy"
+          }
+        ],
+        "RoleName": {
+          "Fn::Sub": "${AWS::StackName}-state-machine-role"
+        }
+      }
+    },
     "WorkflowStartFunctionRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -1457,6 +1504,39 @@
         "Principal": "apigateway.amazonaws.com",
         "SourceArn": {
           "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${Stage}/GET/zenmoney/auth"
+        }
+      }
+    },
+    "StateMachine": {
+      "Type": "AWS::StepFunctions::StateMachine",
+      "Properties": {
+        "DefinitionS3Location": {
+          "Bucket": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${PersistentStackName}-DeploymentBucketName"
+            }
+          },
+          "Key": "state-machine-definition.json"
+        },
+        "DefinitionSubstitutions": {
+          "StateMachineArn": {
+            "Fn::Sub": "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${AWS::StackName}-state-machine"
+          },
+          "WorkflowStartFunctionArn": {
+            "Fn::GetAtt": [
+              "WorkflowStartFunction",
+              "Arn"
+            ]
+          }
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "StateMachineRole",
+            "Arn"
+          ]
+        },
+        "StateMachineName": {
+          "Fn::Sub": "${AWS::StackName}-state-machine"
         }
       }
     }

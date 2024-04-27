@@ -9,9 +9,9 @@ const dynamoDbDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient);
 export const handler = async (event) => {
   console.log('event', JSON.stringify(event));
 
-  const { executionId, userId } = event;
+  const { current: { executionArn: currentExecutionArn }, previousExecutionArn, userId } = event;
 
-  if (!executionId || !userId) {
+  if (!currentExecutionArn || !userId) {
     return { statusCode: 400 };
   }
 

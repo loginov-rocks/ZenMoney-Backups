@@ -1,0 +1,7 @@
+{
+  "current": {
+    "executionArn": "arn:aws:states:us-east-1:abc123:execution:state-machine:c3b18169-2ce5-4065-b3d1-dc50f310e55e"
+  },
+  "previousExecutionArn": "arn:aws:states:us-east-1:abc123:execution:state-machine:13128e14-9edd-4655-9614-706170a14fd1",
+  "userId": "65f349f3-88ee-473b-904a-82b33180dc20"
+}

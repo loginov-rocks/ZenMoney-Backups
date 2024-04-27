@@ -1,0 +1,61 @@
+{
+  "StartAt": "AddExecutionArn",
+  "States": {
+    "AddExecutionArn": {
+      "Type": "Pass",
+      "Next": "WorkflowStartFunction",
+      "Parameters": {
+        "executionArn.$": "$$.Execution.Id"
+      },
+      "ResultPath": "$.current"
+    },
+    "WorkflowStartFunction": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${WorkflowStartFunctionArn}",
+        "Payload.$": "$"
+      },
+      "Next": "ValidateAuthorization",
+      "OutputPath": "$.Payload"
+    },
+    "ValidateAuthorization": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.isAuthorized",
+          "BooleanEquals": true,
+          "Next": "WorkflowBackupFunction"
+        }
+      ],
+      "Default": "UnauthorizedExit"
+    },
+    "WorkflowBackupFunction": {
+      "Type": "Pass",
+      "Next": "Wait"
+    },
+    "Wait": {
+      "Type": "Wait",
+      "Seconds": 604800,
+      "Next": "StartNextExecution"
+    },
+    "StartNextExecution": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::states:startExecution",
+      "Parameters": {
+        "StateMachineArn": "${StateMachineArn}",
+        "Input": {
+          "previousExecutionArn.$": "$$.Execution.Id",
+          "userId.$": "$.userId"
+        }
+      },
+      "Next": "Success"
+    },
+    "Success": {
+      "Type": "Succeed"
+    },
+    "UnauthorizedExit": {
+      "Type": "Succeed"
+    }
+  }
+}
