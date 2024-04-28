@@ -971,6 +971,18 @@
                       "Fn::Sub": "${PersistentStackName}-UsersTableArn"
                     }
                   }
+                },
+                {
+                  "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${PersistentStackName}-ExecutionsTableArn"
+                    }
+                  }
                 }
               ]
             },
@@ -1345,6 +1357,11 @@
         },
         "Environment": {
           "Variables": {
+            "EXECUTIONS_TABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-ExecutionsTableName"
+              }
+            },
             "USERS_TABLE_NAME": {
               "Fn::ImportValue": {
                 "Fn::Sub": "${PersistentStackName}-UsersTableName"

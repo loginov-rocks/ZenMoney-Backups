@@ -16,19 +16,30 @@
         "FunctionName": "${WorkflowStartFunctionArn}",
         "Payload.$": "$"
       },
-      "Next": "ValidateAuthorization",
+      "Next": "IsAuthorized",
       "OutputPath": "$.Payload"
     },
-    "ValidateAuthorization": {
+    "IsAuthorized": {
       "Type": "Choice",
       "Choices": [
         {
           "Variable": "$.isAuthorized",
           "BooleanEquals": true,
-          "Next": "WorkflowBackupFunction"
+          "Next": "IsConcurrent"
         }
       ],
       "Default": "UnauthorizedExit"
+    },
+    "IsConcurrent": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.isConcurrent",
+          "BooleanEquals": true,
+          "Next": "ConcurrentExit"
+        }
+      ],
+      "Default": "WorkflowBackupFunction"
     },
     "WorkflowBackupFunction": {
       "Type": "Pass",
@@ -50,6 +61,9 @@
         }
       },
       "Next": "Success"
+    },
+    "ConcurrentExit": {
+      "Type": "Succeed"
     },
     "Success": {
       "Type": "Succeed"

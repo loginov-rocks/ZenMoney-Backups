@@ -1,0 +1,13 @@
+{
+  "$metadata": {
+    "httpStatusCode": 200,
+    "requestId": "J36QQ0RNEF6DAPRND7P8FLJ107VV4KQNSO5AEMVJF66Q9ASUAAJG",
+    "attempts": 1,
+    "totalRetryDelay": 0
+  },
+  "Item": {
+    "executionArn": "arn:aws:states:us-east-1:abc123:execution:state-machine:13128e14-9edd-4655-9614-706170a14fd1",
+    "updated": 1714273708656,
+    "userId": "65f349f3-88ee-473b-904a-82b33180dc20"
+  }
+}
