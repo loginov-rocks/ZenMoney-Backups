@@ -1,0 +1,1 @@
+export const EXECUTIONS_TABLE_NAME = process.env.EXECUTIONS_TABLE_NAME;

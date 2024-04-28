@@ -16,6 +16,19 @@
         "FunctionName": "${WorkflowStartFunctionArn}",
         "Payload.$": "$"
       },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
       "Next": "IsAuthorized",
       "OutputPath": "$.Payload"
     },
@@ -28,7 +41,30 @@
           "Next": "IsConcurrent"
         }
       ],
-      "Default": "UnauthorizedExit"
+      "Default": "WorkflowUnauthorizedCleanupFunction"
+    },
+    "WorkflowUnauthorizedCleanupFunction": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${WorkflowUnauthorizedCleanupFunctionArn}",
+        "Payload.$": "$"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "UnauthorizedExit",
+      "OutputPath": "$.Payload"
     },
     "IsConcurrent": {
       "Type": "Choice",

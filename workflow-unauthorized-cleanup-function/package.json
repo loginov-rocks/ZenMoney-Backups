@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "package": "rm -f workflow-unauthorized-cleanup-function.zip && zip -j workflow-unauthorized-cleanup-function.zip src/*"
+  },
+  "peerDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0"
+  }
+}
