@@ -1,0 +1,10 @@
+{
+  "$metadata": {
+    "httpStatusCode": 200,
+    "requestId": "7a171a70-c037-4c4d-941c-3cfc275f82ef",
+    "attempts": 1,
+    "totalRetryDelay": 0
+  },
+  "executionArn": "arn:aws:states:us-east-1:abc123:execution:state-machine:13128e14-9edd-4655-9614-706170a14fd1",
+  "startDate": "2024-04-28T02:07:09.800Z"
+}

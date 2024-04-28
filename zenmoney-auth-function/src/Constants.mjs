@@ -1,3 +1,5 @@
+export const STATE_MACHINE_ARN = process.env.STATE_MACHINE_ARN;
+
 export const USERS_TABLE_NAME = process.env.USERS_TABLE_NAME;
 
 export const ZENMONEY_API_BASE_URL = process.env.ZENMONEY_API_BASE_URL;

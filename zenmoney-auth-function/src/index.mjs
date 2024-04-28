@@ -1,9 +1,10 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { SSMClient } from '@aws-sdk/client-ssm';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 
 import {
-  USERS_TABLE_NAME, ZENMONEY_API_BASE_URL, ZENMONEY_API_CONSUMER_KEY_PARAMETER_NAME,
+  STATE_MACHINE_ARN, USERS_TABLE_NAME, ZENMONEY_API_BASE_URL, ZENMONEY_API_CONSUMER_KEY_PARAMETER_NAME,
   ZENMONEY_API_CONSUMER_SECRET_PARAMETER_NAME, ZENMONEY_API_REDIRECT_URI,
 } from './Constants.mjs';
 import { SsmParameter } from './SsmParameter.mjs';
@@ -11,6 +12,7 @@ import { ZenMoneyApi } from './ZenMoneyApi.mjs';
 
 const dynamoDbClient = new DynamoDBClient();
 const dynamoDbDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient);
+const sfnClient = new SFNClient();
 const ssmClient = new SSMClient();
 
 const zenMoneyApiConsumerKeyParameter = new SsmParameter({
@@ -68,16 +70,19 @@ export const handler = async (event) => {
   zenMoneyApi.setConsumerKey(zenMoneyApiConsumerKey);
   zenMoneyApi.setConsumerSecret(zenMoneyApiConsumerSecret);
 
-  let token;
+  let zenMoneyTokens;
   try {
-    token = await zenMoneyApi.token(zenMoneyAuthCode);
+    zenMoneyTokens = await zenMoneyApi.tokens(zenMoneyAuthCode);
   } catch (error) {
     console.error(error);
 
     return { statusCode: 502 };
   }
 
-  const item = { authorized: Date.now(), userId, token };
+  // Hide to avoid logging ZenMoney tokens.
+  // console.log('zenMoneyTokens', JSON.stringify(zenMoneyTokens));
+
+  const item = { authorized: Date.now(), userId, token: zenMoneyTokens };
 
   const putCommand = new PutCommand({
     Item: item,
@@ -94,6 +99,22 @@ export const handler = async (event) => {
   }
 
   console.log('putCommandOutput', JSON.stringify(putCommandOutput));
+
+  const startExecutionCommand = new StartExecutionCommand({
+    input: JSON.stringify({ userId }),
+    stateMachineArn: STATE_MACHINE_ARN,
+  });
+
+  let startExecutionCommandOutput;
+  try {
+    startExecutionCommandOutput = await sfnClient.send(startExecutionCommand);
+  } catch (error) {
+    console.error(error);
+
+    return { statusCode: 500 };
+  }
+
+  console.log('startExecutionCommandOutput', JSON.stringify(startExecutionCommandOutput));
 
   return { statusCode: 204 };
 };

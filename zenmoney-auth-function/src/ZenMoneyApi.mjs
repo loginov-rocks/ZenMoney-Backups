@@ -15,7 +15,7 @@ export class ZenMoneyApi {
   /**
    * @see https://github.com/zenmoney/ZenPlugins/wiki/ZenMoney-API#авторизация-
    */
-  async token(code) {
+  async tokens(code) {
     if (!this.consumerKey || !this.consumerSecret) {
       throw new Error('Consumer key or secret missing');
     }

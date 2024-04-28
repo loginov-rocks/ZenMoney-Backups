@@ -1058,6 +1058,13 @@
                       }
                     }
                   ]
+                },
+                {
+                  "Action": "states:StartExecution",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Ref": "StateMachine"
+                  }
                 }
               ]
             },
@@ -1370,6 +1377,9 @@
         },
         "Environment": {
           "Variables": {
+            "STATE_MACHINE_ARN": {
+              "Ref": "StateMachine"
+            },
             "USERS_TABLE_NAME": {
               "Fn::ImportValue": {
                 "Fn::Sub": "${PersistentStackName}-UsersTableName"
