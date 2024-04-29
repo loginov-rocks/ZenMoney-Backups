@@ -329,6 +329,18 @@
                 },
                 {
                   "Fn::GetAtt": [
+                    "WorkflowStartFunction",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
+                    "WorkflowUnauthorizedCleanupFunction",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
                     "ZenMoneyAuthFunction",
                     "Arn"
                   ]
@@ -387,6 +399,30 @@
                 {
                   "Fn::Sub": [
                     "${DeploymentBucketArn}/workflow-backup-function.zip",
+                    {
+                      "DeploymentBucketArn": {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${PersistentStackName}-DeploymentBucketArn"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "Fn::Sub": [
+                    "${DeploymentBucketArn}/workflow-start-function.zip",
+                    {
+                      "DeploymentBucketArn": {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${PersistentStackName}-DeploymentBucketArn"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "Fn::Sub": [
+                    "${DeploymentBucketArn}/workflow-unauthorized-cleanup-function.zip",
                     {
                       "DeploymentBucketArn": {
                         "Fn::ImportValue": {
@@ -1369,7 +1405,7 @@
           ]
         },
         "Runtime": "nodejs20.x",
-        "Timeout": 20
+        "Timeout": 60
       }
     },
     "WorkflowUnauthorizedCleanupFunction": {
@@ -1401,7 +1437,7 @@
           ]
         },
         "Runtime": "nodejs20.x",
-        "Timeout": 20
+        "Timeout": 60
       }
     },
     "ZenMoneyAuthFunction": {

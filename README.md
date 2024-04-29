@@ -8,9 +8,8 @@
 2. Infrastructure: Configure domains, origins, redirects as parameters.
 3. Rename UsersTable to ZenMoneyTokensTable.
 4. Rename `token` in UsersTable to `zenMoneyTokens`.
-5. Configure CD for WorkflowStart and WorkflowUnauthorizedCleanup functions.
-6. Fix computing infrastructure to deploy code from deployment bucket zips.
-7. Implement WorkflowBackupCleanupFunction.
+5. Fix computing infrastructure to deploy code from deployment bucket zips.
+6. Implement WorkflowBackupCleanupFunction.
 
 ## Reference
 
