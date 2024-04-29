@@ -1,22 +1,3 @@
 {
-  "Records": [
-    {
-      "messageId": "83b952b5-3d55-43ed-9ded-1c33638ac669",
-      "receiptHandle": "AQEB5WbYobNjaDgv3+TBHYnT6SfNS2Ams9ziz06iIf+sfA6TSbVLNCL9Wh2K1o/Bam1a/0Q7lwSUoekSOBWK1m617MeIE+l0ozJwdERbZMRFLaQbsotIj4DBVcOCKZSx14IqVBtGg6UDpr8SMfyD9NsRNsHFt7k2+PNGBk5uBD72AHj+JT3YTUd0HLdvg/BVjMay+GmedZu229EpnL1lBkF5mHXpt4KbTWCGsgkc9jcRnZpIge75zodDCxMRWGnIn/pgE4I+KYcq7OzKHTns2hIP63mXB9egL6Or6UUzDWbSGm+CELmLsihaWI8WNAI6u95LCKyh9WnNd2OXMkKmLZmfjb9EGu7FZkDoBSRcAKZF4UEBTwsy2Ml3QQyp2zaNO2dvjjvMPqx+dQeZslB8FU8GzAaSNSeGwM/BXpbF9hpqzFg=",
-      "body": "{\"userId\":\"65f349f3-88ee-473b-904a-82b33180dc20\"}",
-      "attributes": {
-        "ApproximateReceiveCount": "2",
-        "AWSTraceHeader": "Root=1-65ed4356-7b594f3c54ab2b8723601c77;Parent=558d50af05ec7a6e;Sampled=0;Lineage=a9317b42:0",
-        "SentTimestamp": "1710048088993",
-        "SenderId": "AROA3KGZQOJUA6XI7TAZR:orchestrator-function",
-        "ApproximateFirstReceiveTimestamp": "1710048144353"
-      },
-      "messageAttributes": {},
-      "md5OfMessageAttributes": null,
-      "md5OfBody": "f67c920f313ebe3ce5eb8667b0237271",
-      "eventSource": "aws:sqs",
-      "eventSourceARN": "arn:aws:sqs:us-east-1:abc123:backup-queue",
-      "awsRegion": "us-east-1"
-    }
-  ]
+  "userId": "65f349f3-88ee-473b-904a-82b33180dc20"
 }

@@ -37,23 +37,10 @@ const serverTimestampToFileName = (serverTimestamp) => (
 export const handler = async (event) => {
   console.log('event', JSON.stringify(event));
 
-  let message;
-  try {
-    message = JSON.parse(event.Records[0].body);
-  } catch (error) {
-    console.error(error);
-
-    return;
-  }
-
-  console.log('message', JSON.stringify(message));
-
-  const { userId } = message;
+  const { userId } = event;
 
   if (!userId) {
-    console.error('User ID missing');
-
-    return;
+    throw new Error('User ID missing');
   }
 
   const getCommand = new GetCommand({
@@ -61,41 +48,23 @@ export const handler = async (event) => {
     TableName: USERS_TABLE_NAME,
   });
 
-  let getCommandOutput;
-  try {
-    getCommandOutput = await dynamoDbDocumentClient.send(getCommand);
-  } catch (error) {
-    console.error(error);
-
-    return;
-  }
+  const getCommandOutput = await dynamoDbDocumentClient.send(getCommand);
 
   // Hide to avoid logging ZenMoney tokens.
   // console.log('getCommandOutput', JSON.stringify(getCommandOutput));
 
   if (!getCommandOutput || !getCommandOutput.Item) {
-    console.error(`Item with User ID ${userId} missing`);
-
-    return;
+    throw new Error(`DynamoDB record for user ID ${userId} missing`);
   }
 
   const { token } = getCommandOutput.Item;
 
   if (!token.accessToken) {
-    console.error(`Access Token for User ID ${userId} missing`);
-
-    return;
+    throw new Error(`Access token for user ID ${userId} missing`);
   }
 
-  let zenMoneyApiConsumerKey, zenMoneyApiConsumerSecret;
-  try {
-    zenMoneyApiConsumerKey = await zenMoneyApiConsumerKeyParameter.getValue();
-    zenMoneyApiConsumerSecret = await zenMoneyApiConsumerSecretParameter.getValue();
-  } catch (error) {
-    console.error(error);
-
-    return;
-  }
+  const zenMoneyApiConsumerKey = await zenMoneyApiConsumerKeyParameter.getValue();
+  const zenMoneyApiConsumerSecret = await zenMoneyApiConsumerSecretParameter.getValue();
 
   zenMoneyApi.setConsumerKey(zenMoneyApiConsumerKey);
   zenMoneyApi.setConsumerSecret(zenMoneyApiConsumerSecret);
@@ -120,14 +89,9 @@ export const handler = async (event) => {
     Key: objectKey,
   });
 
-  let putObjectCommandOutput;
-  try {
-    putObjectCommandOutput = await s3Client.send(putObjectCommand);
-  } catch (error) {
-    console.error(error);
-
-    return;
-  }
+  const putObjectCommandOutput = await s3Client.send(putObjectCommand);
 
   console.log('putObjectCommandOutput', JSON.stringify(putObjectCommandOutput));
+
+  return { userId };
 };
