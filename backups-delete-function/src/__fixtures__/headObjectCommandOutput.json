@@ -1,0 +1,16 @@
+{
+  "$metadata": {
+    "httpStatusCode": 200,
+    "requestId": "TV5G505TNE4JH1VF",
+    "extendedRequestId": "JZ3IU/5n65el2CY23f8YMeSKaFhzZCEbwKdmnEfnDS7Or0LLwSujPQDVlWo/dmh//2G2Jc0iumA=",
+    "attempts": 1,
+    "totalRetryDelay": 0
+  },
+  "AcceptRanges": "bytes",
+  "LastModified": "2024-03-09T06:08:57.000Z",
+  "ContentLength": 277430,
+  "ETag": "\"a36d30ba16906f577718a1c29ecbd0c2\"",
+  "ContentType": "application/json",
+  "ServerSideEncryption": "AES256",
+  "Metadata": {}
+}

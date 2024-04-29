@@ -125,7 +125,7 @@
     },
     "Wait": {
       "Type": "Wait",
-      "Seconds": 604800,
+      "Seconds": 86400,
       "Next": "StartNextExecution"
     },
     "StartNextExecution": {

@@ -127,6 +127,30 @@
         "PayloadFormatVersion": "2.0"
       }
     },
+    "BackupsDeleteIntegration": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "ApiGateway"
+        },
+        "IntegrationMethod": "POST",
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::Sub": [
+            "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${BackupsDeleteFunctionArn}/invocations",
+            {
+              "BackupsDeleteFunctionArn": {
+                "Fn::GetAtt": [
+                  "BackupsDeleteFunction",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        },
+        "PayloadFormatVersion": "2.0"
+      }
+    },
     "BackupsListIntegration": {
       "Type": "AWS::ApiGatewayV2::Integration",
       "Properties": {
@@ -212,6 +236,22 @@
         "RouteKey": "POST /backups/{fileName}/url",
         "Target": {
           "Fn::Sub": "integrations/${BackupsCreateUrlIntegration}"
+        }
+      }
+    },
+    "BackupsDeleteRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "ApiGateway"
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "JwtAuthorizer"
+        },
+        "RouteKey": "DELETE /backups/{fileName}",
+        "Target": {
+          "Fn::Sub": "integrations/${BackupsDeleteIntegration}"
         }
       }
     },
@@ -316,6 +356,12 @@
                 },
                 {
                   "Fn::GetAtt": [
+                    "BackupsDeleteFunction",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
                     "BackupsListFunction",
                     "Arn"
                   ]
@@ -368,6 +414,18 @@
                 {
                   "Fn::Sub": [
                     "${DeploymentBucketArn}/backups-create-url-function.zip",
+                    {
+                      "DeploymentBucketArn": {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${PersistentStackName}-DeploymentBucketArn"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "Fn::Sub": [
+                    "${DeploymentBucketArn}/backups-delete-function.zip",
                     {
                       "DeploymentBucketArn": {
                         "Fn::ImportValue": {
@@ -561,8 +619,8 @@
               "Statement": [
                 {
                   "Action": [
-                    "s3:ListBucket",
-                    "s3:GetObject"
+                    "s3:GetObject",
+                    "s3:ListBucket"
                   ],
                   "Effect": "Allow",
                   "Resource": [
@@ -592,6 +650,94 @@
         ],
         "RoleName": {
           "Fn::Sub": "${AWS::StackName}-backups-create-url-function-role"
+        }
+      }
+    },
+    "BackupsDeleteFunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "logs:CreateLogGroup",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+                  }
+                },
+                {
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": [
+                      "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}:*",
+                      {
+                        "FunctionName": {
+                          "Fn::Sub": "${AWS::StackName}-backups-delete-function"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "PolicyName": "AWSLambdaBasicExecutionRole"
+          },
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": [
+                    "s3:GetObject",
+                    "s3:ListBucket"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${PersistentStackName}-BackupsBucketArn"
+                      }
+                    },
+                    {
+                      "Fn::Sub": [
+                        "${BackupsBucketArn}/*",
+                        {
+                          "BackupsBucketArn": {
+                            "Fn::ImportValue": {
+                              "Fn::Sub": "${PersistentStackName}-BackupsBucketArn"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "PolicyName": "CustomPolicy"
+          }
+        ],
+        "RoleName": {
+          "Fn::Sub": "${AWS::StackName}-backups-delete-function-role"
         }
       }
     },
@@ -1293,6 +1439,43 @@
         "Timeout": 20
       }
     },
+    "BackupsDeleteFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": [
+          "arm64"
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${PersistentStackName}-DeploymentBucketName"
+            }
+          },
+          "S3Key": "backups-delete-function.zip"
+        },
+        "Environment": {
+          "Variables": {
+            "BACKUPS_BUCKET_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-BackupsBucketName"
+              }
+            }
+          }
+        },
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-backups-delete-function"
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "BackupsDeleteFunctionRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 20
+      }
+    },
     "BackupsListFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
@@ -1610,6 +1793,19 @@
         "Principal": "apigateway.amazonaws.com",
         "SourceArn": {
           "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${Stage}/POST/backups/*/url"
+        }
+      }
+    },
+    "BackupsDeleteFunctionPermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "BackupsDeleteFunction"
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${Stage}/DELETE/backups/*"
         }
       }
     },

@@ -36,6 +36,34 @@ jobs:
           BACKUPS_CREATE_URL_FUNCTION_NAME: ${{ secrets.BACKUPS_CREATE_URL_FUNCTION_NAME }}
           DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
 
+  backups-delete-function-cd:
+    name: Backups Delete Function CD
+    defaults:
+      run:
+        working-directory: backups-delete-function
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run package
+      - name: Upload function deployment package to S3
+        run: aws s3 cp backups-delete-function.zip s3://$DEPLOYMENT_BUCKET_NAME
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+      - name: Update function code
+        run: aws lambda update-function-code --function-name $BACKUPS_DELETE_FUNCTION_NAME --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-key backups-delete-function.zip > /dev/null
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          BACKUPS_DELETE_FUNCTION_NAME: ${{ secrets.BACKUPS_DELETE_FUNCTION_NAME }}
+          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+
   backups-list-function-cd:
     name: Backups List Function CD
     defaults:
