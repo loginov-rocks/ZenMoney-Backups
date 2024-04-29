@@ -8,6 +8,7 @@
 2. Infrastructure: Configure domains, origins, redirects as parameters.
 3. Implement WorkflowBackupCleanupFunction.
 4. CD: Update State Machine with the definition file uploaded.
+5. Implement BackupsDeleteFunction.
 
 ## Reference
 
