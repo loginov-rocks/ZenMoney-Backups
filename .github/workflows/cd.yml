@@ -64,34 +64,6 @@ jobs:
           BACKUPS_LIST_FUNCTION_NAME: ${{ secrets.BACKUPS_LIST_FUNCTION_NAME }}
           DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
 
-  orchestrator-function-cd:
-    name: Orchestrator Function CD
-    defaults:
-      run:
-        working-directory: orchestrator-function
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm run package
-      - name: Upload function deployment package to S3
-        run: aws s3 cp orchestrator-function.zip s3://$DEPLOYMENT_BUCKET_NAME
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
-      - name: Update function code
-        run: aws lambda update-function-code --function-name $ORCHESTRATOR_FUNCTION_NAME --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-key orchestrator-function.zip > /dev/null
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
-          ORCHESTRATOR_FUNCTION_NAME: ${{ secrets.ORCHESTRATOR_FUNCTION_NAME }}
-
   web-app-cd:
     name: Web App CD
     defaults:
@@ -125,6 +97,34 @@ jobs:
           dist-id: ${{ secrets.DISTRIBUTION_ID }}
           invalidation: /*
           private: true
+
+  workflow-backup-cleanup-function-cd:
+    name: Workflow Backup Cleanup Function CD
+    defaults:
+      run:
+        working-directory: workflow-backup-cleanup-function
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run package
+      - name: Upload function deployment package to S3
+        run: aws s3 cp workflow-backup-cleanup-function.zip s3://$DEPLOYMENT_BUCKET_NAME
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+      - name: Update function code
+        run: aws lambda update-function-code --function-name $WORKFLOW_BACKUP_CLEANUP_FUNCTION_NAME --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-key workflow-backup-cleanup-function.zip > /dev/null
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_BUCKET_NAME: ${{ secrets.DEPLOYMENT_BUCKET_NAME }}
+          WORKFLOW_BACKUP_CLEANUP_FUNCTION_NAME: ${{ secrets.WORKFLOW_BACKUP_CLEANUP_FUNCTION_NAME }}
 
   workflow-backup-function-cd:
     name: Workflow Backup Function CD

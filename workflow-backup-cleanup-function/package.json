@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "package": "rm -f workflow-backup-cleanup-function.zip && zip -j workflow-backup-cleanup-function.zip src/*"
+  },
+  "peerDependencies": {
+    "@aws-sdk/client-s3": "^3.0.0"
+  }
+}
