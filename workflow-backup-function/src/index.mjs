@@ -8,6 +8,7 @@ import {
   ZENMONEY_API_CONSUMER_KEY_PARAMETER_NAME, ZENMONEY_API_CONSUMER_SECRET_PARAMETER_NAME, ZENMONEY_API_REDIRECT_URI,
   ZENMONEY_TOKENS_TABLE_NAME,
 } from './Constants.mjs';
+import { serverTimestampToFileName } from './serverTimestampToFileName.mjs';
 import { SsmParameter } from './SsmParameter.mjs';
 import { ZenMoneyApi } from './ZenMoneyApi.mjs';
 
@@ -30,10 +31,6 @@ const zenMoneyApi = new ZenMoneyApi({
   baseUrl: ZENMONEY_API_BASE_URL,
   redirectUri: ZENMONEY_API_REDIRECT_URI,
 });
-
-const serverTimestampToFileName = (serverTimestamp) => (
-  new Date(serverTimestamp * 1000).toISOString().replace(/[T:.]/g, '-')
-);
 
 export const handler = async (event) => {
   console.log('event', JSON.stringify(event));

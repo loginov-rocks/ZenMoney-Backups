@@ -1,0 +1,30 @@
+{
+  "$metadata": {
+    "httpStatusCode": 200,
+    "requestId": "R7H5JVCXF0N2S3DE",
+    "extendedRequestId": "J7xFiMu31lnWwQ9hKcd4VOhSp4gcQs0r9nnTXCAv+s4nqO4sbejLEOKuADlIVFz8ZzL/4qwV6ns=",
+    "attempts": 1,
+    "totalRetryDelay": 0
+  },
+  "Contents": [
+    {
+      "Key": "65f349f3-88ee-473b-904a-82b33180dc20/2024-03-09-06-08-55-130Z.json",
+      "LastModified": "2024-03-09T06:08:57.000Z",
+      "ETag": "\"a36d30ba16906f577718a1c29ecbd0c2\"",
+      "Size": 277430,
+      "StorageClass": "STANDARD"
+    },
+    {
+      "Key": "65f349f3-88ee-473b-904a-82b33180dc20/2024-03-10-04-31-04-000Z.json",
+      "LastModified": "2024-03-10T04:31:07.000Z",
+      "ETag": "\"71ac6e44debfe9056285b4d5c1ea136a\"",
+      "Size": 277432,
+      "StorageClass": "STANDARD"
+    }
+  ],
+  "IsTruncated": false,
+  "KeyCount": 2,
+  "MaxKeys": 1000,
+  "Name": "backups-bucket",
+  "Prefix": "65f349f3-88ee-473b-904a-82b33180dc20/"
+}

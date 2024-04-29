@@ -1,15 +1,9 @@
 import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 
 import { BACKUPS_BUCKET_NAME, BACKUPS_KEY_SUFFIX } from './Constants.mjs';
+import { fileNameToServerTimestamp } from './fileNameToServerTimestamp.mjs';
 
 const s3Client = new S3Client();
-
-const fileNameToServerTimestamp = (fileName) => {
-  const elements = fileName.split('-');
-  const date = new Date(`${elements[0]}-${elements[1]}-${elements[2]}T${elements[3]}:${elements[4]}:${elements[5]}.${elements[6]}`);
-
-  return Math.floor(date.getTime() / 1000);
-};
 
 export const handler = async (event) => {
   console.log('event', JSON.stringify(event));

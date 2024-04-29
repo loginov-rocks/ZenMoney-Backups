@@ -6,9 +6,8 @@
 
 1. ZenMoney: Request to update redirect URI.
 2. Infrastructure: Configure domains, origins, redirects as parameters.
-3. Implement WorkflowBackupCleanupFunction.
-4. CD: Update State Machine with the definition file uploaded.
-5. Implement BackupsDeleteFunction.
+3. CD: Update State Machine with the definition file uploaded.
+4. Implement BackupsDeleteFunction.
 
 ## Reference
 

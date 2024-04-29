@@ -1,0 +1,14 @@
+{
+  "$metadata": {
+    "httpStatusCode": 200,
+    "requestId": "8TBQZQWDVFRZSHQH",
+    "extendedRequestId": "pDJNwvCaCaKGLnXvsfdFHeqNi4acNTx2d1YRe9s7lXNLLI2FgejnBH4N9I9RNs2mneN/SJFal3A=",
+    "attempts": 1,
+    "totalRetryDelay": 0
+  },
+  "Deleted": [
+    {
+      "Key": "65f349f3-88ee-473b-904a-82b33180dc20/2024-03-09-06-08-55-130Z.json"
+    }
+  ]
+}
