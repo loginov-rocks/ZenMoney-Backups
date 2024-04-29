@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "package": "rm -f backup-function.zip && zip -j backup-function.zip src/*"
+    "package": "rm -f workflow-backup-function.zip && zip -j workflow-backup-function.zip src/*"
   },
   "peerDependencies": {
     "@aws-sdk/client-dynamodb": "^3.0.0",

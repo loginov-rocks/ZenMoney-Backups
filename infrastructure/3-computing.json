@@ -351,12 +351,6 @@
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "BackupFunction",
-                    "Arn"
-                  ]
-                },
-                {
-                  "Fn::GetAtt": [
                     "BackupsCreateUrlFunction",
                     "Arn"
                   ]
@@ -370,6 +364,12 @@
                 {
                   "Fn::GetAtt": [
                     "OrchestratorFunction",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
+                    "WorkflowBackupFunction",
                     "Arn"
                   ]
                 },
@@ -394,18 +394,6 @@
               ],
               "Effect": "Allow",
               "Resource": [
-                {
-                  "Fn::Sub": [
-                    "${DeploymentBucketArn}/backup-function.zip",
-                    {
-                      "DeploymentBucketArn": {
-                        "Fn::ImportValue": {
-                          "Fn::Sub": "${PersistentStackName}-DeploymentBucketArn"
-                        }
-                      }
-                    }
-                  ]
-                },
                 {
                   "Fn::Sub": [
                     "${DeploymentBucketArn}/backups-create-url-function.zip",
@@ -433,6 +421,18 @@
                 {
                   "Fn::Sub": [
                     "${DeploymentBucketArn}/orchestrator-function.zip",
+                    {
+                      "DeploymentBucketArn": {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${PersistentStackName}-DeploymentBucketArn"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "Fn::Sub": [
+                    "${DeploymentBucketArn}/workflow-backup-function.zip",
                     {
                       "DeploymentBucketArn": {
                         "Fn::ImportValue": {
@@ -497,122 +497,6 @@
               ]
             }
           ]
-        }
-      }
-    },
-    "BackupFunctionRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Principal": {
-                "Service": "lambda.amazonaws.com"
-              },
-              "Effect": "Allow"
-            }
-          ]
-        },
-        "Policies": [
-          {
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Action": "logs:CreateLogGroup",
-                  "Effect": "Allow",
-                  "Resource": {
-                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
-                  }
-                },
-                {
-                  "Action": [
-                    "logs:CreateLogStream",
-                    "logs:PutLogEvents"
-                  ],
-                  "Effect": "Allow",
-                  "Resource": {
-                    "Fn::Sub": [
-                      "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}:*",
-                      {
-                        "FunctionName": {
-                          "Fn::Sub": "${AWS::StackName}-backup-function"
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            },
-            "PolicyName": "AWSLambdaBasicExecutionRole"
-          },
-          {
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Action": "dynamodb:GetItem",
-                  "Effect": "Allow",
-                  "Resource": {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${PersistentStackName}-UsersTableArn"
-                    }
-                  }
-                },
-                {
-                  "Action": "s3:PutObject",
-                  "Effect": "Allow",
-                  "Resource": {
-                    "Fn::Sub": [
-                      "${BackupsBucketArn}/*",
-                      {
-                        "BackupsBucketArn": {
-                          "Fn::ImportValue": {
-                            "Fn::Sub": "${PersistentStackName}-BackupsBucketArn"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                },
-                {
-                  "Action": [
-                    "sqs:GetQueueAttributes",
-                    "sqs:ReceiveMessage",
-                    "sqs:DeleteMessage"
-                  ],
-                  "Effect": "Allow",
-                  "Resource": {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${PersistentStackName}-BackupQueueArn"
-                    }
-                  }
-                },
-                {
-                  "Action": "ssm:GetParameter",
-                  "Effect": "Allow",
-                  "Resource": [
-                    {
-                      "Fn::ImportValue": {
-                        "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerKeyParameterArn"
-                      }
-                    },
-                    {
-                      "Fn::ImportValue": {
-                        "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerSecretParameterArn"
-                      }
-                    }
-                  ]
-                }
-              ]
-            },
-            "PolicyName": "CustomPolicy"
-          }
-        ],
-        "RoleName": {
-          "Fn::Sub": "${AWS::StackName}-backup-function-role"
         }
       }
     },
@@ -890,6 +774,12 @@
                   "Resource": [
                     {
                       "Fn::GetAtt": [
+                        "WorkflowBackupFunction",
+                        "Arn"
+                      ]
+                    },
+                    {
+                      "Fn::GetAtt": [
                         "WorkflowStartFunction",
                         "Arn"
                       ]
@@ -916,6 +806,109 @@
         ],
         "RoleName": {
           "Fn::Sub": "${AWS::StackName}-state-machine-role"
+        }
+      }
+    },
+    "WorkflowBackupFunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "logs:CreateLogGroup",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+                  }
+                },
+                {
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": [
+                      "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}:*",
+                      {
+                        "FunctionName": {
+                          "Fn::Sub": "${AWS::StackName}-workflow-backup-function"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "PolicyName": "AWSLambdaBasicExecutionRole"
+          },
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": "dynamodb:GetItem",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::ImportValue": {
+                      "Fn::Sub": "${PersistentStackName}-UsersTableArn"
+                    }
+                  }
+                },
+                {
+                  "Action": "s3:PutObject",
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Sub": [
+                      "${BackupsBucketArn}/*",
+                      {
+                        "BackupsBucketArn": {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "${PersistentStackName}-BackupsBucketArn"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Action": "ssm:GetParameter",
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerKeyParameterArn"
+                      }
+                    },
+                    {
+                      "Fn::ImportValue": {
+                        "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerSecretParameterArn"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "PolicyName": "CustomPolicy"
+          }
+        ],
+        "RoleName": {
+          "Fn::Sub": "${AWS::StackName}-workflow-backup-function-role"
         }
       }
     },
@@ -1251,74 +1244,6 @@
         }
       }
     },
-    "BackupFunctionEventSourceMapping": {
-      "Type": "AWS::Lambda::EventSourceMapping",
-      "Properties": {
-        "BatchSize": 1,
-        "EventSourceArn": {
-          "Fn::ImportValue": {
-            "Fn::Sub": "${PersistentStackName}-BackupQueueArn"
-          }
-        },
-        "FunctionName": {
-          "Ref": "BackupFunction"
-        },
-        "MaximumBatchingWindowInSeconds": 10
-      }
-    },
-    "BackupFunction": {
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Architectures": [
-          "arm64"
-        ],
-        "Code": {
-          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
-        },
-        "Environment": {
-          "Variables": {
-            "BACKUPS_BUCKET_NAME": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${PersistentStackName}-BackupsBucketName"
-              }
-            },
-            "USERS_TABLE_NAME": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${PersistentStackName}-UsersTableName"
-              }
-            },
-            "ZENMONEY_API_BASE_URL": {
-              "Ref": "ZenMoneyApiBaseUrl"
-            },
-            "ZENMONEY_API_CONSUMER_KEY_PARAMETER_NAME": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerKeyParameterName"
-              }
-            },
-            "ZENMONEY_API_CONSUMER_SECRET_PARAMETER_NAME": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerSecretParameterName"
-              }
-            },
-            "ZENMONEY_API_REDIRECT_URI": {
-              "Ref": "ZenMoneyApiRedirectUri"
-            }
-          }
-        },
-        "FunctionName": {
-          "Fn::Sub": "${AWS::StackName}-backup-function"
-        },
-        "Handler": "index.handler",
-        "Role": {
-          "Fn::GetAtt": [
-            "BackupFunctionRole",
-            "Arn"
-          ]
-        },
-        "Runtime": "nodejs20.x",
-        "Timeout": 60
-      }
-    },
     "BackupsCreateUrlFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
@@ -1418,6 +1343,59 @@
         "Role": {
           "Fn::GetAtt": [
             "OrchestratorFunctionRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 60
+      }
+    },
+    "WorkflowBackupFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": [
+          "arm64"
+        ],
+        "Code": {
+          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+        },
+        "Environment": {
+          "Variables": {
+            "BACKUPS_BUCKET_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-BackupsBucketName"
+              }
+            },
+            "USERS_TABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-UsersTableName"
+              }
+            },
+            "ZENMONEY_API_BASE_URL": {
+              "Ref": "ZenMoneyApiBaseUrl"
+            },
+            "ZENMONEY_API_CONSUMER_KEY_PARAMETER_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerKeyParameterName"
+              }
+            },
+            "ZENMONEY_API_CONSUMER_SECRET_PARAMETER_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-ZenMoneyApiConsumerSecretParameterName"
+              }
+            },
+            "ZENMONEY_API_REDIRECT_URI": {
+              "Ref": "ZenMoneyApiRedirectUri"
+            }
+          }
+        },
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-workflow-backup-function"
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "WorkflowBackupFunctionRole",
             "Arn"
           ]
         },
@@ -1659,6 +1637,12 @@
         "DefinitionSubstitutions": {
           "StateMachineArn": {
             "Fn::Sub": "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${AWS::StackName}-state-machine"
+          },
+          "WorkflowBackupFunctionArn": {
+            "Fn::GetAtt": [
+              "WorkflowBackupFunction",
+              "Arn"
+            ]
           },
           "WorkflowStartFunctionArn": {
             "Fn::GetAtt": [
