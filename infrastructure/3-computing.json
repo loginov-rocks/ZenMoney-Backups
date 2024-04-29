@@ -639,6 +639,12 @@
                   "Resource": [
                     {
                       "Fn::GetAtt": [
+                        "WorkflowBackupCleanupFunction",
+                        "Arn"
+                      ]
+                    },
+                    {
+                      "Fn::GetAtt": [
                         "WorkflowBackupFunction",
                         "Arn"
                       ]
@@ -1547,6 +1553,12 @@
         "DefinitionSubstitutions": {
           "StateMachineArn": {
             "Fn::Sub": "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:${AWS::StackName}-state-machine"
+          },
+          "WorkflowBackupCleanupFunctionArn": {
+            "Fn::GetAtt": [
+              "WorkflowBackupCleanupFunction",
+              "Arn"
+            ]
           },
           "WorkflowBackupFunctionArn": {
             "Fn::GetAtt": [
