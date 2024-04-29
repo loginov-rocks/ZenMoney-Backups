@@ -80,29 +80,6 @@
         }
       }
     },
-    "UsersTableArn": {
-      "Value": {
-        "Fn::GetAtt": [
-          "UsersTable",
-          "Arn"
-        ]
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-UsersTableArn"
-        }
-      }
-    },
-    "UsersTableName": {
-      "Value": {
-        "Ref": "UsersTable"
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-UsersTableName"
-        }
-      }
-    },
     "WebAppBucketArn": {
       "Value": {
         "Fn::GetAtt": [
@@ -163,6 +140,29 @@
       "Export": {
         "Name": {
           "Fn::Sub": "${AWS::StackName}-ZenMoneyApiConsumerSecretParameterName"
+        }
+      }
+    },
+    "ZenMoneyTokensTableArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "ZenMoneyTokensTable",
+          "Arn"
+        ]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-ZenMoneyTokensTableArn"
+        }
+      }
+    },
+    "ZenMoneyTokensTableName": {
+      "Value": {
+        "Ref": "ZenMoneyTokensTable"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-ZenMoneyTokensTableName"
         }
       }
     }
@@ -231,7 +231,7 @@
         }
       }
     },
-    "UsersTable": {
+    "ZenMoneyTokensTable": {
       "Type": "AWS::DynamoDB::Table",
       "Properties": {
         "AttributeDefinitions": [
@@ -248,7 +248,7 @@
           }
         ],
         "TableName": {
-          "Fn::Sub": "${AWS::StackName}-users-table"
+          "Fn::Sub": "${AWS::StackName}-zenmoney-tokens-table"
         }
       }
     },

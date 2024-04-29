@@ -1,7 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 
-import { EXECUTIONS_TABLE_NAME, USERS_TABLE_NAME } from './Constants.mjs';
+import { EXECUTIONS_TABLE_NAME, ZENMONEY_TOKENS_TABLE_NAME } from './Constants.mjs';
 
 const dynamoDbClient = new DynamoDBClient();
 const dynamoDbDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient);
@@ -15,17 +15,17 @@ export const handler = async (event) => {
     throw new Error('Current execution ARN or user ID missing');
   }
 
-  const usersGetCommand = new GetCommand({
+  const zenMoneyTokensGetCommand = new GetCommand({
     Key: { userId },
-    TableName: USERS_TABLE_NAME,
+    TableName: ZENMONEY_TOKENS_TABLE_NAME,
   });
 
-  const usersGetCommandOutput = await dynamoDbDocumentClient.send(usersGetCommand);
+  const zenMoneyTokensGetCommandOutput = await dynamoDbDocumentClient.send(zenMoneyTokensGetCommand);
 
   // Hide to avoid logging ZenMoney tokens.
-  // console.log('usersGetCommandOutput', JSON.stringify(usersGetCommandOutput));
+  // console.log('zenMoneyTokensGetCommandOutput', JSON.stringify(zenMoneyTokensGetCommandOutput));
 
-  const isAuthorized = Boolean(usersGetCommandOutput && usersGetCommandOutput.Item);
+  const isAuthorized = Boolean(zenMoneyTokensGetCommandOutput && zenMoneyTokensGetCommandOutput.Item);
 
   // No user in DynamoDB, return unauthorized.
   if (!isAuthorized) {

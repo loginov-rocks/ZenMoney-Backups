@@ -856,7 +856,7 @@
                   "Effect": "Allow",
                   "Resource": {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${PersistentStackName}-UsersTableArn"
+                      "Fn::Sub": "${PersistentStackName}-ZenMoneyTokensTableArn"
                     }
                   }
                 },
@@ -959,7 +959,7 @@
                   "Effect": "Allow",
                   "Resource": {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${PersistentStackName}-UsersTableArn"
+                      "Fn::Sub": "${PersistentStackName}-ZenMoneyTokensTableArn"
                     }
                   }
                 },
@@ -1113,7 +1113,7 @@
                   "Effect": "Allow",
                   "Resource": {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${PersistentStackName}-UsersTableArn"
+                      "Fn::Sub": "${PersistentStackName}-ZenMoneyTokensTableArn"
                     }
                   }
                 },
@@ -1207,7 +1207,7 @@
                   "Effect": "Allow",
                   "Resource": {
                     "Fn::ImportValue": {
-                      "Fn::Sub": "${PersistentStackName}-UsersTableArn"
+                      "Fn::Sub": "${PersistentStackName}-ZenMoneyTokensTableArn"
                     }
                   }
                 }
@@ -1366,11 +1366,6 @@
                 "Fn::Sub": "${PersistentStackName}-BackupsBucketName"
               }
             },
-            "USERS_TABLE_NAME": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${PersistentStackName}-UsersTableName"
-              }
-            },
             "ZENMONEY_API_BASE_URL": {
               "Ref": "ZenMoneyApiBaseUrl"
             },
@@ -1386,6 +1381,11 @@
             },
             "ZENMONEY_API_REDIRECT_URI": {
               "Ref": "ZenMoneyApiRedirectUri"
+            },
+            "ZENMONEY_TOKENS_TABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-ZenMoneyTokensTableName"
+              }
             }
           }
         },
@@ -1424,9 +1424,9 @@
                 "Fn::Sub": "${PersistentStackName}-ExecutionsTableName"
               }
             },
-            "USERS_TABLE_NAME": {
+            "ZENMONEY_TOKENS_TABLE_NAME": {
               "Fn::ImportValue": {
-                "Fn::Sub": "${PersistentStackName}-UsersTableName"
+                "Fn::Sub": "${PersistentStackName}-ZenMoneyTokensTableName"
               }
             }
           }
@@ -1501,11 +1501,6 @@
             "STATE_MACHINE_ARN": {
               "Ref": "StateMachine"
             },
-            "USERS_TABLE_NAME": {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${PersistentStackName}-UsersTableName"
-              }
-            },
             "ZENMONEY_API_BASE_URL": {
               "Ref": "ZenMoneyApiBaseUrl"
             },
@@ -1521,6 +1516,11 @@
             },
             "ZENMONEY_API_REDIRECT_URI": {
               "Ref": "ZenMoneyApiRedirectUri"
+            },
+            "ZENMONEY_TOKENS_TABLE_NAME": {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${PersistentStackName}-ZenMoneyTokensTableName"
+              }
             }
           }
         },
@@ -1554,9 +1554,9 @@
         },
         "Environment": {
           "Variables": {
-            "USERS_TABLE_NAME": {
+            "ZENMONEY_TOKENS_TABLE_NAME": {
               "Fn::ImportValue": {
-                "Fn::Sub": "${PersistentStackName}-UsersTableName"
+                "Fn::Sub": "${PersistentStackName}-ZenMoneyTokensTableName"
               }
             }
           }

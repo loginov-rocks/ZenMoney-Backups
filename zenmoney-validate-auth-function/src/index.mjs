@@ -1,7 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
 
-import { USERS_TABLE_NAME } from './Constants.mjs';
+import { ZENMONEY_TOKENS_TABLE_NAME } from './Constants.mjs';
 
 const dynamoDbClient = new DynamoDBClient();
 const dynamoDbDocumentClient = DynamoDBDocumentClient.from(dynamoDbClient);
@@ -20,7 +20,7 @@ export const handler = async (event) => {
 
   const getCommand = new GetCommand({
     Key: { userId },
-    TableName: USERS_TABLE_NAME,
+    TableName: ZENMONEY_TOKENS_TABLE_NAME,
   });
 
   let getCommandOutput;

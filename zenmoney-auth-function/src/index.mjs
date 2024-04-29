@@ -4,8 +4,8 @@ import { SSMClient } from '@aws-sdk/client-ssm';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 
 import {
-  STATE_MACHINE_ARN, USERS_TABLE_NAME, ZENMONEY_API_BASE_URL, ZENMONEY_API_CONSUMER_KEY_PARAMETER_NAME,
-  ZENMONEY_API_CONSUMER_SECRET_PARAMETER_NAME, ZENMONEY_API_REDIRECT_URI,
+  STATE_MACHINE_ARN, ZENMONEY_API_BASE_URL, ZENMONEY_API_CONSUMER_KEY_PARAMETER_NAME,
+  ZENMONEY_API_CONSUMER_SECRET_PARAMETER_NAME, ZENMONEY_API_REDIRECT_URI, ZENMONEY_TOKENS_TABLE_NAME,
 } from './Constants.mjs';
 import { SsmParameter } from './SsmParameter.mjs';
 import { ZenMoneyApi } from './ZenMoneyApi.mjs';
@@ -82,11 +82,11 @@ export const handler = async (event) => {
   // Hide to avoid logging ZenMoney tokens.
   // console.log('zenMoneyTokens', JSON.stringify(zenMoneyTokens));
 
-  const item = { authorized: Date.now(), userId, token: zenMoneyTokens };
+  const item = { authorized: Date.now(), userId, zenMoneyTokens };
 
   const putCommand = new PutCommand({
     Item: item,
-    TableName: USERS_TABLE_NAME,
+    TableName: ZENMONEY_TOKENS_TABLE_NAME,
   });
 
   let putCommandOutput;

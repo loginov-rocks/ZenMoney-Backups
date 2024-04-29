@@ -1,1 +1,1 @@
-export const USERS_TABLE_NAME = process.env.USERS_TABLE_NAME;
+export const ZENMONEY_TOKENS_TABLE_NAME = process.env.ZENMONEY_TOKENS_TABLE_NAME;
