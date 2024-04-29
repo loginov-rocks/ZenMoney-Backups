@@ -8,8 +8,8 @@
 2. Infrastructure: Configure domains, origins, redirects as parameters.
 3. Rename UsersTable to ZenMoneyTokensTable.
 4. Rename `token` in UsersTable to `zenMoneyTokens`.
-5. Fix computing infrastructure to deploy code from deployment bucket zips.
-6. Implement WorkflowBackupCleanupFunction.
+5. Implement WorkflowBackupCleanupFunction.
+6. CD: Update State Machine with the definition file uploaded.
 
 ## Reference
 

@@ -386,6 +386,18 @@
                 },
                 {
                   "Fn::Sub": [
+                    "${DeploymentBucketArn}/state-machine-definition.json",
+                    {
+                      "DeploymentBucketArn": {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${PersistentStackName}-DeploymentBucketArn"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "Fn::Sub": [
                     "${DeploymentBucketArn}/workflow-backup-cleanup-function.zip",
                     {
                       "DeploymentBucketArn": {
@@ -1229,7 +1241,12 @@
           "arm64"
         ],
         "Code": {
-          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+          "S3Bucket": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${PersistentStackName}-DeploymentBucketName"
+            }
+          },
+          "S3Key": "backups-create-url-function.zip"
         },
         "Environment": {
           "Variables": {
@@ -1261,7 +1278,12 @@
           "arm64"
         ],
         "Code": {
-          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+          "S3Bucket": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${PersistentStackName}-DeploymentBucketName"
+            }
+          },
+          "S3Key": "backups-list-function.zip"
         },
         "Environment": {
           "Variables": {
@@ -1293,7 +1315,12 @@
           "arm64"
         ],
         "Code": {
-          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+          "S3Bucket": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${PersistentStackName}-DeploymentBucketName"
+            }
+          },
+          "S3Key": "workflow-backup-cleanup-function.zip"
         },
         "Environment": {
           "Variables": {
@@ -1325,7 +1352,12 @@
           "arm64"
         ],
         "Code": {
-          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+          "S3Bucket": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${PersistentStackName}-DeploymentBucketName"
+            }
+          },
+          "S3Key": "workflow-backup-function.zip"
         },
         "Environment": {
           "Variables": {
@@ -1378,7 +1410,12 @@
           "arm64"
         ],
         "Code": {
-          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+          "S3Bucket": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${PersistentStackName}-DeploymentBucketName"
+            }
+          },
+          "S3Key": "workflow-start-function.zip"
         },
         "Environment": {
           "Variables": {
@@ -1415,7 +1452,12 @@
           "arm64"
         ],
         "Code": {
-          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+          "S3Bucket": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${PersistentStackName}-DeploymentBucketName"
+            }
+          },
+          "S3Key": "workflow-unauthorized-cleanup-function.zip"
         },
         "Environment": {
           "Variables": {
@@ -1447,7 +1489,12 @@
           "arm64"
         ],
         "Code": {
-          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+          "S3Bucket": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${PersistentStackName}-DeploymentBucketName"
+            }
+          },
+          "S3Key": "zenmoney-auth-function.zip"
         },
         "Environment": {
           "Variables": {
@@ -1498,7 +1545,12 @@
           "arm64"
         ],
         "Code": {
-          "ZipFile": "exports.handler = async (event) => ({ body: JSON.stringify(event), headers: { 'content-type': 'application/json' }, statusCode: 200 });"
+          "S3Bucket": {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${PersistentStackName}-DeploymentBucketName"
+            }
+          },
+          "S3Key": "zenmoney-validate-auth-function.zip"
         },
         "Environment": {
           "Variables": {
