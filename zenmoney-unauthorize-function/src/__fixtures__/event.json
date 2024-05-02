@@ -1,0 +1,69 @@
+{
+  "version": "2.0",
+  "routeKey": "DELETE /zenmoney/auth",
+  "rawPath": "/zenmoney/auth",
+  "rawQueryString": "",
+  "headers": {
+    "accept": "*/*",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9,ru;q=0.8",
+    "authorization": "Bearer abc123",
+    "cache-control": "no-cache",
+    "content-length": "0",
+    "host": "abc123.execute-api.us-east-1.amazonaws.com",
+    "origin": "http://localhost:3000",
+    "pragma": "no-cache",
+    "priority": "u=1, i",
+    "referer": "http://localhost:3000/",
+    "sec-ch-ua": "\"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\", \"Not-A.Brand\";v=\"99\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"macOS\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "cross-site",
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "x-amzn-trace-id": "Root=1-65e93ecf-226807ef51ff0e0a1a45a628",
+    "x-forwarded-for": "76.168.99.91",
+    "x-forwarded-port": "443",
+    "x-forwarded-proto": "https"
+  },
+  "requestContext": {
+    "accountId": "abc123",
+    "apiId": "abc123",
+    "authorizer": {
+      "jwt": {
+        "claims": {
+          "auth_time": "1709784459",
+          "client_id": "abc123",
+          "event_id": "bf15bee4-f8c4-4b9b-b32f-6949181def27",
+          "exp": "1709788059",
+          "iat": "1709784459",
+          "iss": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_abc123",
+          "jti": "e95da5b2-2bb0-417b-a1ed-82b32d1209d6",
+          "origin_jti": "096af476-65de-4d35-a190-243a90627c4e",
+          "scope": "openid profile email",
+          "sub": "65f349f3-88ee-473b-904a-82b33180dc20",
+          "token_use": "access",
+          "username": "danila",
+          "version": "2"
+        },
+        "scopes": null
+      }
+    },
+    "domainName": "abc123.execute-api.us-east-1.amazonaws.com",
+    "domainPrefix": "abc123",
+    "http": {
+      "method": "DELETE",
+      "path": "/zenmoney/auth",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "76.168.99.91",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    },
+    "requestId": "UPbAfiKloAMEYew=",
+    "routeKey": "DELETE /zenmoney/auth",
+    "stage": "$default",
+    "time": "07/Mar/2024:04:13:03 +0000",
+    "timeEpoch": 1709784783675
+  },
+  "isBase64Encoded": false
+}

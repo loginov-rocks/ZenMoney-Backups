@@ -1,0 +1,18 @@
+{
+  "$metadata": {
+    "httpStatusCode": 200,
+    "requestId": "P64JVNJ6J9VLLF6Q4JDPTUAQ6BVV4KQNSO5AEMVJF66Q9ASUAAJG",
+    "attempts": 1,
+    "totalRetryDelay": 0
+  },
+  "Item": {
+    "authorized": 1709874753987,
+    "userId": "65f349f3-88ee-473b-904a-82b33180dc20",
+    "zenMoneyTokens": {
+      "expiresIn": 2147483647,
+      "accessToken": "abc123",
+      "tokenType": "bearer",
+      "refreshToken": "xyz789"
+    }
+  }
+}
