@@ -147,6 +147,25 @@ export class Api {
     }
   }
 
+  public async zenMoneyUnauthorize(): Promise<void> {
+    if (!this.authData) {
+      throw new Error('Auth data missing');
+    }
+
+    const url = `${this.baseUrl}/zenmoney/auth`;
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${this.authData.access_token}`,
+      },
+      method: 'delete',
+    });
+
+    if (!response.ok) {
+      throw response;
+    }
+  }
+
   public async zenMoneyValidateAuth(): Promise<boolean> {
     if (!this.authData) {
       throw new Error('Auth data missing');
