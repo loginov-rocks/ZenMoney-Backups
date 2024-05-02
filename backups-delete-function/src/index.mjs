@@ -1,4 +1,4 @@
-import { HeadObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, HeadObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 import { BACKUPS_BUCKET_NAME, BACKUPS_KEY_SUFFIX } from './Constants.mjs';
 
@@ -46,14 +46,26 @@ export const handler = async (event) => {
 
   console.log('headObjectCommandOutput', JSON.stringify(headObjectCommandOutput));
 
-  // TODO: Delete object.
+  const deleteObjectCommand = new DeleteObjectCommand({
+    Bucket: BACKUPS_BUCKET_NAME,
+    Key: key,
+  });
+
+  let deleteObjectCommandOutput;
+  try {
+    deleteObjectCommandOutput = await s3Client.send(deleteObjectCommand);
+  } catch (error) {
+    console.error(error);
+
+    return { statusCode: 500 };
+  }
+
+  console.log('deleteObjectCommandOutput', JSON.stringify(deleteObjectCommandOutput));
 
   return {
-    body: JSON.stringify({ key }),
     headers: {
       'content-type': 'application/json',
     },
-    // TODO: Return 204 without body.
-    statusCode: 200,
+    statusCode: 204,
   };
 };
