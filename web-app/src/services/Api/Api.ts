@@ -58,6 +58,25 @@ export class Api {
     return json.url;
   }
 
+  public async backupsDelete(fileName: string): Promise<void> {
+    if (!this.authData) {
+      throw new Error('Auth data missing');
+    }
+
+    const url = `${this.baseUrl}/backups/${fileName}`;
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${this.authData.access_token}`,
+      },
+      method: 'delete',
+    });
+
+    if (!response.ok) {
+      throw response;
+    }
+  }
+
   public async backupsList(): Promise<Backup[]> {
     if (!this.authData) {
       throw new Error('Auth data missing');
