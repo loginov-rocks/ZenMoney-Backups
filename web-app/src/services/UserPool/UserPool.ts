@@ -6,6 +6,13 @@ export interface AuthData {
   token_type: 'string';
 }
 
+interface RefreshAuthData {
+  access_token: string;
+  expires_in: number;
+  id_token: string;
+  token_type: 'string';
+}
+
 interface Options {
   clientCallbackUrl: string;
   clientId: string;
@@ -25,13 +32,41 @@ export class UserPool {
     this.domain = domain;
   }
 
-  public async auth(code: string): Promise<AuthData> {
+  public auth(code: string): Promise<AuthData> {
+    return this.request<AuthData>({
+      code,
+      grant_type: 'authorization_code',
+    });
+  }
+
+  public loginRedirect(): void {
+    const scopes = ['email', 'openid', 'profile'];
+
+    const urlSearchParams = new URLSearchParams({
+      client_id: this.clientId,
+      redirect_uri: this.clientCallbackUrl,
+      response_type: 'code',
+      scope: scopes.join(' '),
+    });
+
+    const url = `https://${this.domain}/login?${urlSearchParams.toString()}`;
+
+    window.location.href = url;
+  }
+
+  public refreshToken(refreshToken: string): Promise<RefreshAuthData> {
+    return this.request<RefreshAuthData>({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+    });
+  }
+
+  private async request<ResponseType>(parameters: Record<string, string>): Promise<ResponseType> {
     const url = `https://${this.domain}/oauth2/token`;
 
     const params = {
+      ...parameters,
       client_id: this.clientId,
-      code,
-      grant_type: 'authorization_code',
       redirect_uri: this.clientCallbackUrl,
     };
 
@@ -49,23 +84,6 @@ export class UserPool {
       throw response;
     }
 
-    const json: AuthData = await response.json();
-
-    return json;
-  }
-
-  public loginRedirect(): void {
-    const scopes = ['email', 'openid', 'profile'];
-
-    const urlSearchParams = new URLSearchParams({
-      client_id: this.clientId,
-      redirect_uri: this.clientCallbackUrl,
-      response_type: 'code',
-      scope: scopes.join(' '),
-    });
-
-    const url = `https://${this.domain}/login?${urlSearchParams.toString()}`;
-
-    window.location.href = url;
+    return response.json();
   }
 }

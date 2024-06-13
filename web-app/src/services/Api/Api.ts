@@ -1,4 +1,4 @@
-import { AuthData } from '../UserPool/UserPool';
+import { AuthData, UserPool } from '../UserPool/UserPool';
 
 export interface Backup {
   fileName: string;
@@ -17,10 +17,21 @@ interface BackupsListResponse {
 interface Options {
   authDataStorageKey: string;
   baseUrl: string;
+  userPoolService: UserPool;
 }
 
 interface ZenMoneyAuthRequest {
   zenMoneyAuthCode: string;
+}
+
+enum RequestMethod {
+  Delete = 'DELETE',
+  Get = 'GET',
+  Post = 'POST',
+}
+
+interface RequestOptions {
+  body: string;
 }
 
 export class Api {
@@ -30,70 +41,27 @@ export class Api {
 
   private readonly baseUrl: string;
 
-  public constructor({ authDataStorageKey, baseUrl }: Options) {
+  private readonly userPoolService: UserPool;
+
+  public constructor({ authDataStorageKey, baseUrl, userPoolService }: Options) {
     this.authDataStorageKey = authDataStorageKey;
     this.baseUrl = baseUrl;
+    this.userPoolService = userPoolService;
   }
 
   public async backupsCreateUrl(fileName: string): Promise<string> {
-    if (!this.authData) {
-      throw new Error('Auth data missing');
-    }
-
-    const url = `${this.baseUrl}/backups/${fileName}/url`;
-
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${this.authData.access_token}`,
-      },
-      method: 'post',
-    });
-
-    if (!response.ok) {
-      throw response;
-    }
-
+    const response = await this.request(RequestMethod.Post, `/backups/${fileName}/url`);
     const json: BackupsCreateUrlResponse = await response.json();
 
     return json.url;
   }
 
   public async backupsDelete(fileName: string): Promise<void> {
-    if (!this.authData) {
-      throw new Error('Auth data missing');
-    }
-
-    const url = `${this.baseUrl}/backups/${fileName}`;
-
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${this.authData.access_token}`,
-      },
-      method: 'delete',
-    });
-
-    if (!response.ok) {
-      throw response;
-    }
+    await this.request(RequestMethod.Delete, `/backups/${fileName}`);
   }
 
   public async backupsList(): Promise<Backup[]> {
-    if (!this.authData) {
-      throw new Error('Auth data missing');
-    }
-
-    const url = `${this.baseUrl}/backups`;
-
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${this.authData.access_token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw response;
-    }
-
+    const response = await this.request(RequestMethod.Get, '/backups');
     const json: BackupsListResponse = await response.json();
 
     return json.backups;
@@ -126,67 +94,92 @@ export class Api {
   }
 
   public async zenMoneyAuth(zenMoneyAuthCode: string): Promise<void> {
-    if (!this.authData) {
-      throw new Error('Auth data missing');
-    }
-
-    const url = `${this.baseUrl}/zenmoney/auth`;
     const request: ZenMoneyAuthRequest = { zenMoneyAuthCode };
 
-    const response = await fetch(url, {
+    await this.request(RequestMethod.Post, '/zenmoney/auth', {
       body: JSON.stringify(request),
-      headers: {
-        Authorization: `Bearer ${this.authData.access_token}`,
-        'Content-Type': 'application/json',
-      },
-      method: 'post',
     });
-
-    if (!response.ok) {
-      throw response;
-    }
   }
 
   public async zenMoneyUnauthorize(): Promise<void> {
-    if (!this.authData) {
-      throw new Error('Auth data missing');
-    }
-
-    const url = `${this.baseUrl}/zenmoney/auth`;
-
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${this.authData.access_token}`,
-      },
-      method: 'delete',
-    });
-
-    if (!response.ok) {
-      throw response;
-    }
+    await this.request(RequestMethod.Delete, '/zenmoney/auth');
   }
 
   public async zenMoneyValidateAuth(): Promise<boolean> {
+    try {
+      await this.request(RequestMethod.Get, '/zenmoney/auth');
+    } catch (error: any) {
+      if (error.status === 404) {
+        return false;
+      }
+
+      throw error;
+    }
+
+    return true;
+  }
+
+  private async refreshAuthData(): Promise<void> {
     if (!this.authData) {
       throw new Error('Auth data missing');
     }
 
-    const url = `${this.baseUrl}/zenmoney/auth`;
+    let refreshAuthData;
+    try {
+      refreshAuthData = await this.userPoolService.refreshToken(this.authData.refresh_token);
+    } catch (error) {
+      this.removeAuthData();
 
-    const response = await fetch(url, {
+      throw new Error('Unauthorized');
+    }
+
+    this.storeAuthData({
+      ...this.authData,
+      ...refreshAuthData,
+    });
+  }
+
+  private removeAuthData() {
+    this.authData = null;
+    localStorage.removeItem(this.authDataStorageKey);
+    console.log('Auth data removed');
+  }
+
+  private async request(method: RequestMethod, url: string, options?: RequestOptions): Promise<Response> {
+    if (!this.authData) {
+      throw new Error('Auth data missing');
+    }
+
+    const _url = this.baseUrl + url;
+    const init: RequestInit = {
       headers: {
         Authorization: `Bearer ${this.authData.access_token}`,
       },
-    });
+      method,
+    };
+
+    if (method === RequestMethod.Post && options && options.body) {
+      init.body = options.body;
+      init.headers = {
+        ...init.headers,
+        'Content-Type': 'application/json',
+      };
+    }
+
+    const response = await fetch(_url, init);
 
     if (!response.ok) {
-      if (response.status === 404) {
-        return false;
+      // Intercept Unauthorized, try to refresh the token and rerun the failed request. Consider improvement: it may
+      // issue multiple refresh token requests when multiple requests fail in parallel.
+      if (response.status === 401) {
+        await this.refreshAuthData();
+
+        return this.request(method, url, options);
       }
 
       throw response;
     }
 
-    return true;
+    return response;
   }
 }
