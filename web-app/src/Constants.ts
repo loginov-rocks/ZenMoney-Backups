@@ -9,3 +9,4 @@ export const ZENMONEY_API_CONSUMER_KEY: string = process.env.REACT_APP_ZENMONEY_
 export const ZENMONEY_API_REDIRECT_URI: string = process.env.REACT_APP_ZENMONEY_API_REDIRECT_URI || '';
 
 export const API_AUTH_DATA_STORAGE_KEY = 'zenMoneyBackupsAuthData';
+export const ZENMONEY_AUTHORIZATION_BACKUPS_RETENTION_PERIOD = 30; // days
