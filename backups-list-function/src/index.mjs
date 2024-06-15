@@ -58,6 +58,22 @@ export const handler = async (event) => {
     };
   });
 
+  // Sort by serverTimestamp descending.
+  backups.sort((a, b) => {
+    const serverTimestampA = a.serverTimestamp;
+    const serverTimestampB = b.serverTimestamp;
+
+    if (serverTimestampA < serverTimestampB) {
+      return 1;
+    }
+
+    if (serverTimestampA > serverTimestampB) {
+      return -1;
+    }
+
+    return 0;
+  });
+
   return {
     body: JSON.stringify({ backups }),
     headers: {
