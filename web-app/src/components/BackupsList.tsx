@@ -35,13 +35,21 @@ export const BackupsList = () => {
     }
 
     return (
-      <ul>
-        {backups.map((backup, index) => (
-          <li key={index}>
-            <BackupsListItem backup={backup} />
-          </li>
-        ))}
-      </ul>
+      <table border={1}>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date & Time</th>
+            <th>Controls</th>
+            <th>Size</th>
+          </tr>
+        </thead>
+        <tbody>
+          {backups.map((backup, index) => (
+            <BackupsListItem backup={backup} index={index} key={index} />
+          ))}
+        </tbody>
+      </table>
     );
   }
 

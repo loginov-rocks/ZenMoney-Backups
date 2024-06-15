@@ -5,9 +5,10 @@ import { Backup } from '../services/Api/Api';
 
 interface Props {
   backup: Backup;
+  index: number;
 }
 
-export const BackupsListItem: FC<Props> = ({ backup }) => {
+export const BackupsListItem: FC<Props> = ({ backup, index }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
 
@@ -47,14 +48,26 @@ export const BackupsListItem: FC<Props> = ({ backup }) => {
     setIsLoading(false);
   }
 
+  const dateTime = new Date(backup.serverTimestamp * 1000).toString();
+
   return (
-    <>
-      <button disabled={isLoading || isDeleted} onClick={handleCreateUrlClick}>{new Date(backup.serverTimestamp * 1000).toString()}</button>
-      {' '}
-      ({Math.round(backup.size / 1024)} KB)
-      <button disabled={isLoading || isDeleted} onClick={handleDeleteClick}>Delete</button>
-      {isLoading && ' Loading...'}
-      {isDeleted && ' Deleted'}
-    </>
+    <tr>
+      <td>{index + 1}</td>
+      <td>{isDeleted ? <s>{dateTime}</s> : dateTime}</td>
+      <td>
+        {isLoading
+          ? 'Loading...'
+          : (isDeleted
+            ? 'Deleted'
+            : (
+              <>
+                <button disabled={isDeleted} onClick={handleCreateUrlClick}>Download</button>
+                {' '}
+                <button disabled={isDeleted} onClick={handleDeleteClick}>Delete</button>
+              </>
+            ))}
+      </td>
+      <td>{Math.round(backup.size / 1024)} KB</td>
+    </tr>
   );
 };
