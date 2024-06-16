@@ -1,5 +1,15 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
+  "Conditions": {
+    "LocalhostEnabled": {
+      "Fn::Equals": [
+        {
+          "Ref": "DisableLocalhost"
+        },
+        "false"
+      ]
+    }
+  },
   "Outputs": {
     "DistributionId": {
       "Value": {
@@ -46,6 +56,15 @@
     }
   },
   "Parameters": {
+    "DisableLocalhost": {
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Default": "true",
+      "Description": "Disable Localhost",
+      "Type": "String"
+    },
     "PersistentStackName": {
       "Description": "Name of previously deployed \"Persistent\" CloudFormation Stack",
       "Type": "String"
@@ -123,22 +142,42 @@
           "openid",
           "profile"
         ],
-        "CallbackURLs": [
-          {
-            "Fn::Sub": [
-              "https://${DomainName}",
+        "CallbackURLs": {
+          "Fn::If": [
+            "LocalhostEnabled",
+            [
               {
-                "DomainName": {
-                  "Fn::GetAtt": [
-                    "Distribution",
-                    "DomainName"
-                  ]
-                }
+                "Fn::Sub": [
+                  "https://${DomainName}",
+                  {
+                    "DomainName": {
+                      "Fn::GetAtt": [
+                        "Distribution",
+                        "DomainName"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "http://localhost:3000"
+            ],
+            [
+              {
+                "Fn::Sub": [
+                  "https://${DomainName}",
+                  {
+                    "DomainName": {
+                      "Fn::GetAtt": [
+                        "Distribution",
+                        "DomainName"
+                      ]
+                    }
+                  }
+                ]
               }
             ]
-          },
-          "http://localhost:3000"
-        ],
+          ]
+        },
         "ExplicitAuthFlows": [
           "ALLOW_REFRESH_TOKEN_AUTH"
         ],

@@ -1,5 +1,12 @@
 # Configuration
 
+## Infrastructure
+
+### State Machine
+
+* `Wait.Seconds` = 86400 - controls the waiting period before invoking the subsequent execution,  currently configured
+  to make backups daily per user.
+
 ## GitHub Actions
 
 1. `AWS_ACCESS_KEY_ID`

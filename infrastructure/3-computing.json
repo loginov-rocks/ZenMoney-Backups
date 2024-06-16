@@ -1,5 +1,15 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
+  "Conditions": {
+    "LocalhostEnabled": {
+      "Fn::Equals": [
+        {
+          "Ref": "DisableLocalhost"
+        },
+        "false"
+      ]
+    }
+  },
   "Outputs": {
     "ApiBaseUrl": {
       "Value": {
@@ -12,9 +22,18 @@
   },
   "Parameters": {
     "BackupsRetentionPeriod": {
-      "Default": 365,
+      "Default": 30,
       "Description": "Backups Retention Period (days)",
       "Type": "Number"
+    },
+    "DisableLocalhost": {
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Default": "true",
+      "Description": "Disable Localhost",
+      "Type": "String"
     },
     "DistributionStackName": {
       "Description": "Name of previously deployed \"Distribution\" CloudFormation Stack",
@@ -47,21 +66,40 @@
           "AllowMethods": [
             "*"
           ],
-          "AllowOrigins": [
-            {
-              "Fn::Sub": [
-                "https://${DomainName}",
+          "AllowOrigins": {
+            "Fn::If": [
+              "LocalhostEnabled",
+              [
                 {
-                  "DomainName": {
-                    "Fn::ImportValue": {
-                      "Fn::Sub": "${DistributionStackName}-DomainName"
+                  "Fn::Sub": [
+                    "https://${DomainName}",
+                    {
+                      "DomainName": {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${DistributionStackName}-DomainName"
+                        }
+                      }
                     }
-                  }
+                  ]
+                },
+                "http://localhost:3000"
+              ],
+              [
+                {
+                  "Fn::Sub": [
+                    "https://${DomainName}",
+                    {
+                      "DomainName": {
+                        "Fn::ImportValue": {
+                          "Fn::Sub": "${DistributionStackName}-DomainName"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
-            },
-            "http://localhost:3000"
-          ]
+            ]
+          }
         },
         "Name": {
           "Fn::Sub": "${AWS::StackName}-api-gw"

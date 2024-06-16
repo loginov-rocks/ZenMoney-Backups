@@ -5,9 +5,8 @@
 ## TODO
 
 1. ZenMoney: Request to update redirect URI.
-2. Infrastructure: Configure domains, origins, redirects as parameters.
-3. CD: Update State Machine with the definition file uploaded.
-4. Make State Machine Wait period configurable.
+2. CD: Update State Machine with the definition file uploaded.
+3. Make State Machine Wait period configurable.
 
 ## Reference
 
